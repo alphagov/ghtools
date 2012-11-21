@@ -1,0 +1,139 @@
+from datetime import datetime
+from os import environ as env
+import json
+import logging
+
+import requests
+
+from ghtools import __version__
+
+log = logging.getLogger(__name__)
+
+KNOWN_GITHUBS = {
+    'public': 'https://api.github.com'
+}
+
+class ClientError(Exception):
+    pass
+
+class APIError(Exception):
+    pass
+
+class GithubAPIClient(object):
+    def __init__(self, root=None, nickname='public'):
+        self._session = requests.Session()
+
+        self.nickname = nickname
+        self.token = self._env('oauth_token')
+
+        if root is not None:
+            self.root = root
+        elif self._env('api_root') is not None:
+            self.root = self._env('api_root')
+        else:
+            try:
+                self.root = KNOWN_GITHUBS[self.nickname]
+            except KeyError:
+                msg = "No known API root for nickname '{0}'. Perhaps you need to set ${1}?".format(
+                    self.nickname,
+                    envkey(self.nickname, 'api_root')
+                )
+                raise ClientError(msg)
+
+        log.debug("Created %s", self)
+
+    def _env(self, key, default=None):
+        return env.get(
+            envkey(self.nickname, key),
+            default
+        )
+
+    def _req(self, method, url, _raise=True, *args, **kwargs):
+        res = self._session.request(method, url, *args, **kwargs)
+        if _raise:
+            custom_raise_for_status(res)
+        return res
+
+    def _url(self, path):
+        return self.root + path
+
+    def login(self, username, password, scopes=None):
+        if scopes is None:
+            scopes = []
+
+        ver = __version__
+        now = datetime.utcnow().replace(microsecond=0)
+
+        note = 'ghtools {0} (created {1})'.format(ver, now.isoformat())
+
+        data = {
+            'note': note,
+            'scopes': scopes,
+        }
+
+        res = self._req(
+            'post',
+            self._url('/authorizations'),
+            auth=(username, password),
+            data=json.dumps(data)
+        )
+
+        self.token = res.json['token']
+
+    @property
+    def token(self):
+        return self._token
+
+    @token.setter
+    def token(self, tok):
+        self._token = tok
+        self._session.headers['Authorization'] = 'token {0}'.format(self._token)
+
+    @property
+    def logged_in(self):
+        return self.token is not None
+
+    def org_repos(self, org):
+        for res in paged(self._session, 'get', self._url('/orgs/{0}/repos'.format(org))):
+            for repo in res.json:
+                yield repo
+
+    def repo(self, owner, repo):
+        res = self._req('get', self._url('/repos/{0}/{1}'.format(owner, repo)))
+
+        return res.json
+
+    def org_repo_create(self, org, data):
+        res = self._req(
+            'post',
+            self._url('/orgs/{0}/repos'.format(org)),
+            data=json.dumps(data)
+        )
+
+        return res.json
+
+    def __str__(self):
+        return '<GithubAPIClient {0}={1}>'.format(self.nickname, self.root)
+
+def envkey(nickname, key):
+    return 'GITHUB_{0}_{1}'.format(nickname.upper(), key.upper())
+
+def paged(session, method, url, **kwargs):
+    res = session.request(method, url, **kwargs)
+    custom_raise_for_status(res)
+
+    while True:
+        yield res
+        try:
+            next_page = res.links['next']
+        except KeyError:
+            break
+        else:
+            res = session.request(method, next_page['url'], **kwargs)
+            custom_raise_for_status(res)
+
+def custom_raise_for_status(res):
+    try:
+        res.raise_for_status()
+    except requests.RequestException as err:
+        raise APIError(err)
