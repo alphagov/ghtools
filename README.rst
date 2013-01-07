@@ -28,6 +28,12 @@ Multiple GitHubs: sync an organisation::
 NB: the sync doesn't do everything it should or even close at the moment. It
 will simply create repositories (metadata only) if they don't exist.
 
+Per-GitHub SSL bundle support::
+
+    $ export GITHUB_FOO_API_ROOT=https://github.foo/api/v3
+    $ export GITHUB_FOO_CA_BUNDLE=/usr/share/ssl/github_foo.crt
+    $ eval `gh-login -n foo`
+
 License
 -------
 

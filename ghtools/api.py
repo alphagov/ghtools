@@ -26,6 +26,7 @@ class GithubAPIClient(object):
         self.nickname = nickname
         self.token = self._env('oauth_token')
 
+        # Try to ascertain GitHub API root
         if root is not None:
             self.root = root
         elif self._env('api_root') is not None:
@@ -39,6 +40,11 @@ class GithubAPIClient(object):
                     envkey(self.nickname, 'api_root')
                 )
                 raise ClientError(msg)
+
+        # Use specified SSL CA Bundle if provided
+        ca_bundle = self._env('ca_bundle')
+        if ca_bundle is not None:
+            self._session.verify = ca_bundle
 
         log.debug("Created %s", self)
 
