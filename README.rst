@@ -21,6 +21,7 @@ Simple usage::
 
     $ eval `gh-login`
     $ gh-repo get alphagov/ghtools
+    $ gh-org members alphagov
 
 ``ghtools`` is not a monolithic program. Instead, it comes with a number of
 scripts which each perform very specific tasks. The aim is for these scripts
@@ -57,6 +58,8 @@ bundle::
     $ export GITHUB_FOO_API_ROOT=https://github.foo/api/v3
     $ export GITHUB_FOO_CA_BUNDLE=/usr/share/ssl/github_foo.crt
     $ eval `gh-login -n foo`
+    $ gh-repo -n foo get alphagov/ghtools
+    $ gh-org -n foo members alphagov
 
 License
 -------
