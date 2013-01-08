@@ -9,10 +9,10 @@ from ghtools.api import GithubAPIClient
 log = logging.getLogger(__name__)
 parser = ArghParser(description="Interact with a GitHub organisation")
 parser.add_argument('-n', '--nickname', default='public', help='GitHub instance nickname')
+parser.add_argument('org', help='Organisation name')
 
 
 @arg('-j', '--json', default=False, help='Print full JSON representations')
-@arg('org', help='Organisation name')
 def repos(args):
     """
     Print a list of organisation repositories
@@ -26,7 +26,6 @@ def repos(args):
 
 
 @arg('-j', '--json', default=False, help='Print full JSON representations')
-@arg('org', help='Organisation name')
 def members(args):
     """
     Print a list of organisation members

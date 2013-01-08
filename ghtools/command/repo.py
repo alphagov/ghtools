@@ -9,29 +9,26 @@ from ghtools.api import GithubAPIClient
 log = logging.getLogger(__name__)
 parser = ArghParser(description="Interact with GitHub repos")
 parser.add_argument('-n', '--nickname', default='public', help='GitHub instance nickname')
+parser.add_argument('repo', help='Repo name, e.g. defunkt/resque')
 
 
-@arg('repo', help='Repo name, e.g. defunkt/resque')
 def delete(args):
     """
     Delete the specified repository
     """
     c = GithubAPIClient(nickname=args.nickname)
-    owner, repo = args.repo.rsplit('/', 2)
 
-    res = c.delete('/repos/{0}/{1}'.format(owner, repo))
+    res = c.delete('/repos/{0}'.format(args.repo))
     res.raise_for_status()
 
 
-@arg('repo', help='Repo name, e.g. defunkt/resque')
 def get(args):
     """
     Print the JSON representation of the specified repository to STDOUT
     """
     c = GithubAPIClient(nickname=args.nickname)
-    owner, repo = args.repo.rsplit('/', 2)
 
-    res = c.get('/repos/{0}/{1}'.format(owner, repo))
+    res = c.get('/repos/{0}'.format(args.repo))
     return json.dumps(res.json, indent=2)
 
 
