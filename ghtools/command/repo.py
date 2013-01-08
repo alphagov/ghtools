@@ -7,8 +7,20 @@ from argh import *
 from ghtools.api import GithubAPIClient
 
 log = logging.getLogger(__name__)
+parser = ArghParser(description="Interact with GitHub repos")
+parser.add_argument('-n', '--nickname', default='public', help='GitHub instance nickname')
 
-@arg('-n', '--nickname', default='public', help='GitHub instance nickname')
+@arg('repo', help='Repo name, e.g. defunkt/resque')
+def delete(args):
+    """
+    Delete the specified repository
+    """
+    c = GithubAPIClient(nickname=args.nickname)
+    owner, repo = args.repo.rsplit('/', 2)
+
+    res = c.delete('/repos/{0}/{1}'.format(owner, repo))
+    res.raise_for_status()
+
 @arg('repo', help='Repo name, e.g. defunkt/resque')
 def get(args):
     """
@@ -16,11 +28,11 @@ def get(args):
     """
     c = GithubAPIClient(nickname=args.nickname)
     owner, repo = args.repo.rsplit('/', 2)
-    res = c.repo(owner, repo)
-    return json.dumps(res, indent=2)
 
-parser = ArghParser(description="Interact with GitHub repos")
-parser.add_commands([get])
+    res = c.get('/repos/{0}/{1}'.format(owner, repo))
+    return json.dumps(res.json, indent=2)
+
+parser.add_commands([delete, get])
 
 def main():
     parser.dispatch()
