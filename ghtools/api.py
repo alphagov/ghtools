@@ -77,9 +77,8 @@ class GithubAPIClient(object):
             'scopes': scopes,
         }
 
-        res = self._req(
-            'post',
-            self._url('/authorizations'),
+        res = self.post(
+            '/authorizations',
             auth=(username, password),
             data=json.dumps(data)
         )
@@ -99,24 +98,25 @@ class GithubAPIClient(object):
     def logged_in(self):
         return self.token is not None
 
-    def org_repos(self, org):
-        for res in paged(self._session, 'get', self._url('/orgs/{0}/repos'.format(org))):
+    def delete(self, url, *args, **kwargs):
+        return self._req('delete', self._url(url), *args, **kwargs)
+
+    def get(self, url, *args, **kwargs):
+        return self._req('get', self._url(url), *args, **kwargs)
+
+    def patch(self, url, *args, **kwargs):
+        return self._req('patch', self._url(url), *args, **kwargs)
+
+    def post(self, url, *args, **kwargs):
+        return self._req('post', self._url(url), *args, **kwargs)
+
+    def put(self, url, *args, **kwargs):
+        return self._req('put', self._url(url), *args, **kwargs)
+
+    def paged_get(self, url, *args, **kwargs):
+        for res in paged(self._session, 'get', self._url(url)):
             for repo in res.json:
                 yield repo
-
-    def repo(self, owner, repo):
-        res = self._req('get', self._url('/repos/{0}/{1}'.format(owner, repo)))
-
-        return res.json
-
-    def org_repo_create(self, org, data):
-        res = self._req(
-            'post',
-            self._url('/orgs/{0}/repos'.format(org)),
-            data=json.dumps(data)
-        )
-
-        return res.json
 
     def __str__(self):
         return '<GithubAPIClient {0}={1}>'.format(self.nickname, self.root)
@@ -142,4 +142,6 @@ def custom_raise_for_status(res):
     try:
         res.raise_for_status()
     except requests.RequestException as err:
-        raise APIError(err)
+        newerr = APIError(err)
+        for k, v in newerr.__dict__.items():
+            setattr(newerr, k, v)
