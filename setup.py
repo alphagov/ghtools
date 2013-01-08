@@ -8,6 +8,7 @@ requirements = [
 ]
 
 python_scripts = [
+    'browse',
     'login',
     'org',
     'repo',
