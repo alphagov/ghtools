@@ -17,8 +17,8 @@ def sync_repo(gh_client, org, repo):
     log.debug("Checking if %s/%s exists on %s", org, repo['name'], gh_client)
 
     try:
-        r = gh_client.repo(org, repo['name'])
-    except requests.exceptions.HTTPError as exc:
+        r = gh_client.get('/repos/{0}/{1}'.format(org, repo['name'])).json
+    except APIError as exc:
         if exc.response.status_code == 404:
             log.debug("%s/%s doesn't exist on %s, creating...", org, repo['name'], gh_client)
             create_repo(gh_client, org, repo)
@@ -37,7 +37,7 @@ def create_repo(gh_client, org, repo):
         'has_wiki',
         'has_downloads'
     ])
-    gh_client.org_repo_create(org, repo)
+    gh_client.post('/orgs/{0}/repos'.format(org), data)
     log.info("Created %s/%s on %s", org, repo['name'], gh_client)
 
 @arg('src', help='Sync source')
@@ -63,7 +63,7 @@ def sync_org(args):
     src = GithubAPIClient(nickname=src_nickname)
     dst = GithubAPIClient(nickname=dst_nickname)
 
-    for repo in src.org_repos(src_org):
+    for repo in src.paged_get('/orgs/{0}/repos'.format(src_org)):
         sync_repo(dst, dst_org, repo)
 
 def main():
