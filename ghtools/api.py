@@ -143,5 +143,6 @@ def custom_raise_for_status(res):
         res.raise_for_status()
     except requests.RequestException as err:
         newerr = APIError(err)
-        for k, v in newerr.__dict__.items():
+        for k, v in err.__dict__.items():
             setattr(newerr, k, v)
+        raise newerr
