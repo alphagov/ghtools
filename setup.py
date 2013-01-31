@@ -13,6 +13,7 @@ python_scripts = [
     'org',
     'repo',
     'sync-org',
+    'migrate-org'
 ]
 
 setup(

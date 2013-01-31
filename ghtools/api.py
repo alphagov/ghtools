@@ -2,7 +2,7 @@ from datetime import datetime
 from os import environ as env
 import json
 import logging
-
+import urlparse
 import requests
 
 from ghtools import __version__
@@ -55,6 +55,7 @@ class GithubAPIClient(object):
         )
 
     def _req(self, method, url, _raise=True, *args, **kwargs):
+        kwargs["verify"] = False
         res = self._session.request(method, url, *args, **kwargs)
         if _raise:
             custom_raise_for_status(res)
@@ -125,7 +126,9 @@ def envkey(nickname, key):
     return 'GITHUB_{0}_{1}'.format(nickname.upper(), key.upper())
 
 def paged(session, method, url, **kwargs):
+    kwargs["verify"] = False
     res = session.request(method, url, **kwargs)
+
     custom_raise_for_status(res)
 
     while True:
@@ -146,3 +149,63 @@ def custom_raise_for_status(res):
         for k, v in err.__dict__.items():
             setattr(newerr, k, v)
         raise newerr
+
+class GithubOrganisation(object):
+    @classmethod
+    def create(cls, path):
+        nickname, organisation = path.split(':', 2)
+
+        return GithubOrganisation(nickname, organisation, GithubAPIClient(nickname=nickname))
+
+    def __init__(self, nickname, organisation, client):
+        self.nickname = nickname
+        self.organisation = organisation
+        self.client = client
+
+    @property
+    def hostname(self):
+        return urlparse.urlparse(self.client.root).netloc.split(":")[0]
+
+    def full_name(self, name):
+        return '{0}/{1}'.format(self.organisation, name)
+
+    def get_project(self, name):
+        return self.client.get('/repos/{0}'.format(self.full_name(name)))
+
+    def create_project(self, project):
+        try:
+            self.get_project(project["name"])
+        except APIError as e:
+            if e.response.status_code != 404: raise
+
+            keys = [
+                'name',
+                'description',
+                'homepage',
+                'private',
+                'has_issues',
+                'has_wiki',
+                'has_downloads'
+            ]
+            payload = dict((k, project[k]) for k in keys)
+            self.client.post('/orgs/{0}/repos'.format(self.organisation), data=json.dumps(payload))
+            log.info("Created %s on %s", self.full_name(project["name"]), self.client)
+        else:
+            log.debug("%s already exists on %s, skipping...", self.full_name(project["name"]), self.client)
+
+    def add_public_key(self, title, key):
+        self.client.post("/user/keys", data=json.dumps({
+            "title": title,
+            "key": key
+        }))
+
+    def remove_public_key(self, to_remove):
+        for key in self.client.get("/user/keys").json:
+            if key["key"] == to_remove:
+                self.client.delete("/user/keys/{0}".format(key["id"]))
+                return True
+
+        return False
+
+    def __str__(self):
+        return '<GithubOrganisation {0}, {1}>'.format(self.nickname, self.organisation)
