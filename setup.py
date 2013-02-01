@@ -13,7 +13,6 @@ python_scripts = [
     'login',
     'org',
     'repo',
-    'sync-org',
     'migrate-project'
 ]
 
