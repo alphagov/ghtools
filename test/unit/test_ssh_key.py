@@ -99,9 +99,9 @@ class TestSSHKey(object):
 		self.key.add_host("myotherhost")
 		self.key.remove()
 
-		print(read_file_contents(self.key.config_path))
-
 		assert_false("myhost" in read_file_contents(self.key.config_path))
+		assert_false(os.path.exists(self.key.public_key_file))
+		assert_false(os.path.exists(self.key.private_key_file))
 
 
 def read_file_contents(path):

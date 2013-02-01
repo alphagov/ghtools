@@ -84,6 +84,9 @@ class SSHKey(object):
 		with open(self.config_path, "w+") as f:
 			f.write("\n".join(lines) + "\n")
 
+		os.remove(self.public_key_file)
+		os.remove(self.private_key_file)
+
 	def _touch_config(self):
 		if not os.path.exists(self.config_path):
 			with open(self.config_path, "w+") as f: f.write("")
