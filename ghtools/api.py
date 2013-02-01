@@ -56,6 +56,9 @@ class GithubAPIClient(object):
 
     def _req(self, method, url, _raise=True, *args, **kwargs):
         kwargs["verify"] = False
+        if "data" in kwargs and (isinstance(kwargs['data'], int) or isinstance(kwargs['data'], dict)):
+            kwargs['data'] = json.dumps(kwargs['data'])
+
         res = self._session.request(method, url, *args, **kwargs)
         if _raise:
             custom_raise_for_status(res)
@@ -168,6 +171,18 @@ class GithubOrganisation(object):
 
     def full_name(self, name):
         return '{0}/{1}'.format(self.organisation, name)
+
+    def list_issues(self, name):
+        return sorted(self._list_all_things(name, 'issues'), key=lambda i: i['number'])
+
+    def list_pulls(self, name):
+        return sorted(self._list_all_things(name, 'pulls'), key=lambda i: i['number'])
+
+    def _list_things(self, project, type, state):
+        return list(self.client.paged_get('/repos/{0}/{1}?direction=asc&state={2}'.format(self.full_name(project), type, state)))
+
+    def _list_all_things(self, project, type):
+        return self._list_things(project, type, 'closed') + self._list_things(project, type, 'open')
 
     def get_project(self, name):
         return self.client.get('/repos/{0}'.format(self.full_name(name)))

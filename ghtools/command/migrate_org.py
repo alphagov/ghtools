@@ -12,13 +12,11 @@ def migrate_org(args):
 	src = GithubOrganisation.create(args.src)
 	dst = GithubOrganisation.create(args.dst)
 
-	migrators.project.migrate(src, dst, "alphagov-deployment")
-	migrators.repo.migrate(src, dst, "alphagov-deployment")
+	app_name = "feedback"
 
-#	migrator.migrate_repositories()
-
-#	migrator.migrate_issues()
-#	migrator.migrate_wiki()
+	migrators.project.migrate(src, dst, app_name)
+	migrators.repo.migrate(src, dst, app_name)
+	migrators.issues.migrate(src, dst, app_name)
 
 def main():
 	dispatch_command(migrate_org)
