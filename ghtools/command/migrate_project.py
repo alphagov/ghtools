@@ -9,7 +9,7 @@ from ghtools import migrators
 @arg('src',     help='Migration source')
 @arg('dst',     help='Migration destination')
 @arg('project', help='Project to be migrated')
-def migrate_org(args):
+def migrate_project(args):
 	src = GithubOrganisation.create(args.src)
 	dst = GithubOrganisation.create(args.dst)
 
@@ -22,7 +22,7 @@ def migrate_org(args):
 	# migrators.wiki.migrate(src, dst, args.project) # The wiki has to be visted on the target to create it.
 
 def main():
-	dispatch_command(migrate_org)
+	dispatch_command(migrate_project)
 
 if __name__ == '__main__':
 	main()
