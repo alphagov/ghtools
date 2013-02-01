@@ -1,6 +1,9 @@
 import json
+import logging
 
 from ghtools.api import APIError
+
+log = logging.getLogger(__name__)
 
 def migrate(src, dst, name):
 	src_issues = src.list_issues(name)
@@ -29,18 +32,24 @@ def migrate(src, dst, name):
 				dst.client.patch('/repos/{0}/issues/{1}'.format(dst.full_name(name), issue['number']), data=payload)
 
 		for pull in src_pulls:
-			if pull['number'] not in dst_pulls:
-				payload = {
-					'issue': pull['number'],
-					'head':  pull['head']['sha'],
-					'base':  pull['base']['sha']
-				}
-				dst_pull = dst.client.post('/repos/{0}/pulls'.format(dst.full_name(name)), data=payload).json
-				dst_pulls[dst_pull['number']] = dst_pull
+			try:
+				if pull['number'] not in dst_pulls:
+					payload = {
+						'issue': pull['number'],
+						'head':  pull['head']['sha'],
+						'base':  pull['base']['sha']
+					}
+					dst_pull = dst.client.post('/repos/{0}/pulls'.format(dst.full_name(name)), data=payload).json
+					dst_pulls[dst_pull['number']] = dst_pull
 
-			if pull['state'] != dst_pulls[pull['number']]['state']:
-				payload = {'state': pull['state']}
-				dst.client.patch('/repos/{0}/pulls/{2}'.format(dst.full_name(name), issue['number']), data=payload)
+				if pull['state'] != dst_pulls[pull['number']]['state']:
+					payload = {'state': pull['state']}
+					dst.client.patch('/repos/{0}/pulls/{2}'.format(dst.full_name(name), issue['number']), data=payload)
+			except APIError as e:
+				if e.response.status_code == 500:
+					log.error("Failed to migrate pull request, maybe the branch was deleted?")
+				else:
+					raise
 	except APIError as e:
 		print(e.response.text)
 		raise
