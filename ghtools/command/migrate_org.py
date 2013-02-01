@@ -18,6 +18,7 @@ def migrate_org(args):
 	migrators.repo.migrate(src, dst, app_name)
 	migrators.issues.migrate(src, dst, app_name)
 	migrators.comments.migrate(src, dst, app_name)
+	migrators.hooks.migrate(src, dst, app_name)
 
 def main():
 	dispatch_command(migrate_org)
