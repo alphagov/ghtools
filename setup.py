@@ -9,6 +9,7 @@ requirements = [
 
 python_scripts = [
     'browse',
+    'list-members',
     'login',
     'org',
     'repo',
