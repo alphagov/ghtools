@@ -13,7 +13,8 @@ python_scripts = [
     'login',
     'org',
     'repo',
-    'migrate-project'
+    'migrate-project',
+    'migrate-teams'
 ]
 
 setup(
