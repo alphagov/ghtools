@@ -19,6 +19,7 @@ def migrate_org(args):
 	migrators.issues.migrate(src, dst, app_name)
 	migrators.comments.migrate(src, dst, app_name)
 	migrators.hooks.migrate(src, dst, app_name)
+	# migrators.wiki.migrate(src, dst, app_name) # The wiki has to be visted on the target to create it.
 
 def main():
 	dispatch_command(migrate_org)
