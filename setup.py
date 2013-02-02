@@ -11,10 +11,11 @@ python_scripts = [
     'browse',
     'list-members',
     'login',
+    'migrate-project',
+    'migrate-teams',
     'org',
     'repo',
-    'migrate-project',
-    'migrate-teams'
+    'status',
 ]
 
 setup(
