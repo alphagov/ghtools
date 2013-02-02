@@ -1,15 +1,19 @@
 ghtools
 =======
 
-A set of commandline utilities to assist with manipulating GitHubs (plural).
+A set of commandline utilities for interacting with the GitHub or GitHub
+Enterprise API.
 
 Installation
 ------------
 
-For the time being, I suggest you clone the repository, and do a::
+``ghtools`` is available on PyPI_ and can be installed using pip_::
 
-    $ pip install -e .
+    $ pip install ghtools
 
+.. _PyPI: http://pypi.python.org/pypi
+.. _pip: http://www.pip-installer.org/
+    
 Usage
 -----
 
@@ -18,17 +22,37 @@ Simple usage::
     $ eval `gh-login`
     $ gh-repo get alphagov/ghtools
 
-Multiple GitHubs: sync an organisation::
+``ghtools`` is not a monolithic program. Instead, it comes with a number of
+scripts which each perform very specific tasks. The aim is for these scripts
+to be composable, allowing you to pipe their data to and from other unix tools
+(``grep``, ``sort``, ``uniq``, ``python -m json.tool``, etc.) in order to
+build up your own more complex scripts.
 
-    $ export GITHUB_GHE_API_ROOT=https://git.internal/api/v3
-    $ eval `gh-login -n public`
-    $ eval `gh-login -n ghe`
-    $ gh-sync-org public:alphagov ghe:alphagov
+Currently available tools within ``ghtools``
 
-NB: the sync doesn't do everything it should or even close at the moment. It
-will simply create repositories (metadata only) if they don't exist.
+==================   ======================================================
+Command              Description
+==================   ======================================================
+gh-browse            Manually browse the GitHub API by URL
+gh-list-members      List members of a GitHub organisation (may be removed)
+gh-login             Login to GitHub, generating an OAuth login token
+gh-migrate-project   Migrate an entire project between GitHub instances
+gh-migrate-teams     Migrate organisation teams between GitHub instances
+gh-org               Interact with organisations 
+gh-repo              Interact with repositories
+gh-status            Submit commit build status to GitHub
+==================   ======================================================
 
-Per-GitHub SSL bundle support::
+
+Multiple instances
+------------------
+
+``ghtools`` is, in particular, designed for interacting with multiple GitHub
+instances (i.e. github.com as well as your company's GitHub Enterprise
+installation). You tell ``ghtools`` how to connect you non-github.com GitHub
+instances using "nicknames" and environment variables. For example, here's how
+to login to a GitHub instance nicknamed "foo", using a custom SSL cert
+bundle::
 
     $ export GITHUB_FOO_API_ROOT=https://github.foo/api/v3
     $ export GITHUB_FOO_CA_BUNDLE=/usr/share/ssl/github_foo.crt
