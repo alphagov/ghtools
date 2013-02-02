@@ -1,3 +1,4 @@
+import os
 from setuptools import setup, find_packages
 
 from ghtools import __version__
@@ -18,6 +19,12 @@ python_scripts = [
     'status',
 ]
 
+HERE = os.path.dirname(__file__)
+try:
+    long_description = open(os.path.join(HERE, 'README.rst')).read()
+except:
+    long_description = None
+
 setup(
     name='ghtools',
     version=__version__,
@@ -30,6 +37,7 @@ setup(
     url='https://github.com/alphagov/ghtools',
 
     description='ghtools: tools for interacting with the GitHub API',
+    long_description=long_description,
     license='MIT',
     keywords='sysadmin git github api',
 
