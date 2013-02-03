@@ -1,6 +1,6 @@
-import project
-import repo
-import issues
-import comments
-import hooks
-import wiki
+from . import project
+from . import repo
+from . import issues
+from . import comments
+from . import hooks
+from . import wiki
