@@ -4,6 +4,9 @@ ghtools
 A set of commandline utilities for interacting with the GitHub or GitHub
 Enterprise API.
 
+.. image:: https://travis-ci.org/alphagov/ghtools.png?branch=master
+   target: https://travis-ci.org/alphagov/ghtools
+
 Installation
 ------------
 
