@@ -9,6 +9,7 @@ from ghtools.api import GithubAPIClient
 log = logging.getLogger(__name__)
 parser = ArghParser(description="Set commit/branch build status")
 
+
 @arg('-n', '--nickname', default='public', help='GitHub instance nickname')
 @arg('repo', help='Repository name (e.g. "joebloggs/myapp")')
 @arg('sha', help='Git SHA1')
@@ -21,7 +22,7 @@ def status(args):
     """
     c = GithubAPIClient(nickname=args.nickname)
 
-    payload = { 'state': args.state }
+    payload = {'state': args.state}
 
     if args.description is not None:
         payload['description'] = args.description
@@ -36,6 +37,7 @@ def status(args):
 
 def main():
     dispatch_command(status)
+
 
 if __name__ == '__main__':
     main()

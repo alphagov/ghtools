@@ -10,6 +10,7 @@ log = logging.getLogger(__name__)
 parser = ArghParser(description="Interact with GitHub repos")
 parser.add_argument('-n', '--nickname', default='public', help='GitHub instance nickname')
 
+
 @arg('repo', help='Repo name, e.g. defunkt/resque')
 def delete(args):
     """
@@ -20,6 +21,7 @@ def delete(args):
 
     res = c.delete('/repos/{0}/{1}'.format(owner, repo))
     res.raise_for_status()
+
 
 @arg('repo', help='Repo name, e.g. defunkt/resque')
 def get(args):
@@ -32,7 +34,9 @@ def get(args):
     res = c.get('/repos/{0}/{1}'.format(owner, repo))
     return json.dumps(res.json, indent=2)
 
+
 parser.add_commands([delete, get])
+
 
 def main():
     parser.dispatch()

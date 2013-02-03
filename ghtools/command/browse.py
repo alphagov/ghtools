@@ -9,6 +9,7 @@ from ghtools.api import GithubAPIClient
 log = logging.getLogger(__name__)
 parser = ArghParser(description="Browse the GitHub API")
 
+
 @arg('-n', '--nickname', default='public', help='GitHub instance nickname')
 @arg('url', help='URL to browse')
 def browse(args):
@@ -29,8 +30,10 @@ def browse(args):
     else:
         print(res.content)
 
+
 def main():
     dispatch_command(browse)
+
 
 if __name__ == '__main__':
     main()

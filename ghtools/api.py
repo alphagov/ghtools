@@ -13,11 +13,14 @@ KNOWN_GITHUBS = {
     'public': 'https://api.github.com'
 }
 
+
 class ClientError(Exception):
     pass
 
+
 class APIError(Exception):
     pass
+
 
 class GithubAPIClient(object):
     def __init__(self, root=None, nickname='public'):
@@ -125,8 +128,10 @@ class GithubAPIClient(object):
     def __str__(self):
         return '<GithubAPIClient {0}={1}>'.format(self.nickname, self.root)
 
+
 def envkey(nickname, key):
     return 'GITHUB_{0}_{1}'.format(nickname.upper(), key.upper())
+
 
 def paged(session, method, url, **kwargs):
     kwargs["verify"] = False
@@ -144,6 +149,7 @@ def paged(session, method, url, **kwargs):
             res = session.request(method, next_page['url'], **kwargs)
             custom_raise_for_status(res)
 
+
 def custom_raise_for_status(res):
     try:
         res.raise_for_status()
@@ -152,6 +158,7 @@ def custom_raise_for_status(res):
         for k, v in err.__dict__.items():
             setattr(newerr, k, v)
         raise newerr
+
 
 class GithubOrganisation(object):
     @classmethod
@@ -191,7 +198,8 @@ class GithubOrganisation(object):
         try:
             self.get_project(project["name"])
         except APIError as e:
-            if e.response.status_code != 404: raise
+            if e.response.status_code != 404:
+                raise
 
             keys = [
                 'name',

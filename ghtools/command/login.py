@@ -10,6 +10,7 @@ from ghtools.api import GithubAPIClient, envkey
 log = logging.getLogger(__name__)
 parser = ArghParser()
 
+
 def login_if_needed(gh, scopes):
     if gh.logged_in:
         log.info("Already logged in")
@@ -20,6 +21,7 @@ def login_if_needed(gh, scopes):
     password = getpass("Password: ")
 
     gh.login(username, password, scopes=scopes)
+
 
 @arg('-n', '--nickname', default='public', help='GitHub instance nickname')
 @arg('-s', '--scope', default=None, action='append', help='GitHub auth scopes to request')
@@ -33,8 +35,10 @@ def login(args):
 
     print("export {0}='{1}'".format(envkey(c.nickname, 'oauth_token'), c.token))
 
+
 def main():
     dispatch_command(login)
+
 
 if __name__ == '__main__':
     main()

@@ -10,6 +10,7 @@ log = logging.getLogger(__name__)
 parser = ArghParser(description="Interact with a GitHub organisation")
 parser.add_argument('-n', '--nickname', default='public', help='GitHub instance nickname')
 
+
 @arg('-j', '--json', default=False, help='Print full JSON representations')
 @arg('org', help='Organisation name')
 def repos(args):
@@ -22,6 +23,7 @@ def repos(args):
             print(json.dumps(repo, indent=2))
         else:
             print(repo['name'])
+
 
 @arg('-j', '--json', default=False, help='Print full JSON representations')
 @arg('org', help='Organisation name')
@@ -36,7 +38,9 @@ def members(args):
         else:
             print(repo['login'])
 
+
 parser.add_commands([repos, members])
+
 
 def main():
     parser.dispatch()
