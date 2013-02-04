@@ -27,6 +27,7 @@ class GithubAPIError(GithubError):
 class GithubAPIClient(object):
     def __init__(self, root=None, nickname=None):
         self._session = requests.Session()
+        self._session.headers['content-type'] = 'application/json'
 
         if nickname is not None:
             self.nickname = nickname
