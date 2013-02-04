@@ -135,7 +135,6 @@ def envkey(nickname, key):
 
 
 def paged(session, method, url, **kwargs):
-    kwargs["verify"] = False
     res = session.request(method, url, **kwargs)
 
     custom_raise_for_status(res)
