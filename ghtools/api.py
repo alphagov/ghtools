@@ -64,7 +64,6 @@ class GithubAPIClient(object):
         )
 
     def _req(self, method, url, _raise=True, *args, **kwargs):
-        kwargs["verify"] = False
         if "data" in kwargs and (isinstance(kwargs['data'], int) or isinstance(kwargs['data'], dict)):
             kwargs['data'] = json.dumps(kwargs['data'])
 
