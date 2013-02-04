@@ -99,7 +99,8 @@ class GithubAPIClient(object):
     @token.setter
     def token(self, tok):
         self._token = tok
-        self._session.headers['Authorization'] = 'token {0}'.format(self._token)
+        if tok is not None:
+            self._session.headers['Authorization'] = 'token {0}'.format(self._token)
 
     @property
     def logged_in(self):
