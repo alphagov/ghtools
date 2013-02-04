@@ -4,8 +4,9 @@ from getpass import getpass, _raw_input
 import logging
 import sys
 
-from argh import *
-from ghtools.api import GithubAPIClient, envkey
+from argh import ArghParser, arg, dispatch_command
+from ghtools import cli
+from ghtools.api import envkey
 
 log = logging.getLogger(__name__)
 parser = ArghParser()
@@ -29,8 +30,7 @@ def login(args):
     """
     Log into a GitHub instance, and print the resulting OAuth token.
     """
-    c = GithubAPIClient(nickname=args.github)
-
+    c = cli.get_client(args.github)
     login_if_needed(c, args.scope)
 
     print("export {0}='{1}'".format(envkey(c.nickname, 'oauth_token'), c.token))
