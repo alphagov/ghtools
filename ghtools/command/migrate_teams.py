@@ -2,7 +2,7 @@ import logging
 from argh import *
 import csv
 
-from ghtools.api import GithubOrganisation, APIError
+from ghtools.api import GithubOrganisation, GithubAPIError
 from ghtools import migrators
 
 log = logging.getLogger(__name__)
@@ -41,7 +41,7 @@ def migrate_teams(args):
                 try:
                     dst.client.put('/teams/{0}/members/{1}'.format(dst_teams[src_team['name']], members[src_member['login']]), data=' ')
                     log.debug("User '{0}' added to '{1}'".format(src_member['login'], src_team['name']))
-                except APIError as e:
+                except GithubAPIError as e:
                     if e.response.status_code == 404:
                         log.error("User '{0}' not found.".format(members[src_member['login']]))
                     else:
@@ -53,7 +53,7 @@ def migrate_teams(args):
             try:
                 dst.client.put('/teams/{0}/repos/{1}'.format(dst_teams[src_team['name']], dst.full_name(src_repo['name'])), data=' ')
                 log.debug("Project '{0}' to '{1}'".format(src_repo['name'], src_team['name']))
-            except APIError as e:
+            except GithubAPIError as e:
                 if e.response.status_code == 404:
                     log.debug("Project '{0}' does not exist".format(src_repo['name']))
                 else:
@@ -67,7 +67,7 @@ def lookup_member(login):
 def main():
     try:
         dispatch_command(migrate_teams)
-    except APIError as e:
+    except GithubAPIError as e:
         print(e.response.text)
         raise
 

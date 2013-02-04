@@ -3,7 +3,7 @@ import json
 
 from ..helpers import *
 
-from ghtools.api import GithubAPIClient, GithubOrganisation, envkey, APIError
+from ghtools.api import GithubAPIClient, GithubOrganisation, envkey, GithubAPIError
 
 # This environment variable is expected to be set when testing. Tox will set
 # it (see tox.ini)
@@ -78,7 +78,7 @@ class TestGithubOrganisation(object):
         self.client.get.assert_called_with('/repos/myorganisation/myproject')
 
     def test_create_project_when_project_does_not_exist(self):
-        error = APIError()
+        error = GithubAPIError()
         error.response = MagicMock()
         error.response.status_code = 404
         self.client.get.side_effect = error
@@ -106,13 +106,13 @@ class TestGithubOrganisation(object):
         assert_false(self.client.post.called)
 
     def test_create_project_error_is_not_404(self):
-        error = APIError()
+        error = GithubAPIError()
         error.response = MagicMock()
         error.response.status_code = 401
         self.client.get.side_effect = error
 
         project = json.loads(fixture("release_app.json"))
-        assert_raises(APIError, self.org.create_project, project)
+        assert_raises(GithubAPIError, self.org.create_project, project)
 
     def test_hostname(self):
         self.client.root = "https://imaginary.host:1234/foo/bar"

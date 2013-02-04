@@ -1,7 +1,7 @@
 import json
 import logging
 
-from ghtools.api import APIError
+from ghtools.api import GithubAPIError
 
 log = logging.getLogger(__name__)
 
@@ -46,12 +46,12 @@ def migrate(src, dst, name):
                 if pull['state'] != dst_pulls[pull['number']]['state']:
                     payload = {'state': pull['state']}
                     dst.client.patch('/repos/{0}/pulls/{2}'.format(dst.full_name(name), issue['number']), data=payload)
-            except APIError as e:
+            except GithubAPIError as e:
                 if e.response.status_code == 500:
                     log.error("Failed to migrate pull request, maybe the branch was deleted?")
                 else:
                     raise
-    except APIError as e:
+    except GithubAPIError as e:
         print(e.response.text)
         raise
 

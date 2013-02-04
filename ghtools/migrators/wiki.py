@@ -2,7 +2,7 @@ import subprocess
 import logging
 import os
 
-from ghtools.api import APIError
+from ghtools.api import GithubAPIError
 from ghtools.ssh_key import SSHKey
 
 log = logging.getLogger(__name__)
@@ -22,7 +22,7 @@ def migrate(src, dst, name):
             try:
                 src.add_public_key("ghtools migration tool", key.public_key)
                 dst.add_public_key("ghtools migration tool", key.public_key)
-            except APIError:
+            except GithubAPIError:
                 pass
 
             run("mkdir -p repos")
@@ -34,7 +34,7 @@ def migrate(src, dst, name):
             run("cd repos/{0}.wiki && git fetch upstream".format(name))
             run("cd repos/{0}.wiki && git push --mirror origin".format(name))
             run("cd repos/{0}.wiki && git push --force origin upstream/master:refs/heads/master".format(name))
-        except APIError as e:
+        except GithubAPIError as e:
             print(e.response.text)
             raise
         finally:

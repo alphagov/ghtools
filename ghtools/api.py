@@ -16,11 +16,11 @@ KNOWN_GITHUBS = {
 }
 
 
-class ClientError(Exception):
+class GithubError(Exception):
     pass
 
 
-class APIError(Exception):
+class GithubAPIError(GithubError):
     pass
 
 
@@ -47,7 +47,7 @@ class GithubAPIClient(object):
                     self.nickname,
                     envkey(self.nickname, 'api_root')
                 )
-                raise ClientError(msg)
+                raise GithubError(msg)
 
         # Use specified SSL CA Bundle if provided
         ca_bundle = self._env('ca_bundle')
@@ -159,7 +159,7 @@ def custom_raise_for_status(res):
     try:
         res.raise_for_status()
     except requests.RequestException as err:
-        newerr = APIError(err)
+        newerr = GithubAPIError(err)
         for k, v in err.__dict__.items():
             setattr(newerr, k, v)
         raise newerr
@@ -202,7 +202,7 @@ class GithubOrganisation(object):
     def create_project(self, project):
         try:
             self.get_project(project["name"])
-        except APIError as e:
+        except GithubAPIError as e:
             if e.response.status_code != 404:
                 raise
 
