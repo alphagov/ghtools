@@ -1,23 +1,21 @@
 from __future__ import print_function
 
 import json
-import logging
 
-from argh import *
-from ghtools.api import GithubAPIClient
+from argh import ArghParser, arg
+from ghtools import cli
 
-log = logging.getLogger(__name__)
 parser = ArghParser(description="Browse the GitHub API")
 
 
-@arg('-n', '--nickname', default='public', help='GitHub instance nickname')
+@arg('github', nargs='?', help='GitHub instance nickname (e.g "enterprise")')
 @arg('url', help='URL to browse')
 def browse(args):
     """
     Print the GitHub API response at the given URL
     """
-    c = GithubAPIClient(nickname=args.nickname)
-    res = c.get(args.url)
+    c = cli.get_client(args.github)
+    res = c.get(args.url, _raise=False)
 
     print('HTTP/1.1 {0} {1}'.format(res.status_code, res.reason))
 
@@ -29,11 +27,11 @@ def browse(args):
         print(json.dumps(res.json, indent=2))
     else:
         print(res.content)
+parser.set_default_command(browse)
 
 
 def main():
-    dispatch_command(browse)
-
+    parser.dispatch()
 
 if __name__ == '__main__':
     main()

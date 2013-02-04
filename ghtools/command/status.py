@@ -3,7 +3,7 @@ from __future__ import print_function
 import json
 import logging
 
-from argh import ArghParser, arg, dispatch_command
+from argh import ArghParser, arg
 from ghtools import cli
 
 log = logging.getLogger(__name__)
@@ -34,11 +34,11 @@ def status(args):
         res = c.post('/repos/{0}/statuses/{1}'.format(args.org, args.sha), data=payload)
 
     print(json.dumps(res.json, indent=2))
+parser.set_default_command(status)
 
 
 def main():
-    dispatch_command(status)
-
+    parser.dispatch()
 
 if __name__ == '__main__':
     main()
