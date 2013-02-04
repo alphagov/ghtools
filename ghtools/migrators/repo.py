@@ -1,56 +1,30 @@
-import subprocess
 import logging
 import os
-
-from ghtools.api import GithubAPIError
-from ghtools.ssh_key import SSHKey
+import tempfile
+import shutil
+from subprocess import call
 
 log = logging.getLogger(__name__)
 
 
-def migrate(src, dst, name):
-    key = SSHKey()
-    key.create()
-
+def migrate(src, dst, repo):
+    checkout = tempfile.mkdtemp()
     try:
-        key.add_host(src.hostname)
-        key.add_host(dst.hostname)
-
-        try:
-            src.add_public_key("ghtools migration tool", key.public_key)
-            dst.add_public_key("ghtools migration tool", key.public_key)
-        except GithubAPIError:
-            pass
-
-        run("mkdir -p repos")
-
-        if not os.path.exists(os.path.join("repos", name)):
-            run("git clone --bare ghtools.{0}:{1} repos/{2}".format(dst.hostname, dst.full_name(name), name))
-            run("cd repos/{0} && git remote add upstream ghtools.{1}:{2}".format(name, src.hostname, src.full_name(name)))
-
-        run("cd repos/{0} && git fetch upstream".format(name))
-        run("cd repos/{0} && git push --mirror origin".format(name))
-
-        branches = filter(None, map(str.strip, run('cd repos/{0} && git branch -r'.format(name), output=True).split("\n")))
-        for branch in branches:
-            b = branch.split('/')[1]
-            run('cd repos/{0} && git push --force origin {1}:refs/heads/{2}'.format(name, branch, b))
-
-    except GithubAPIError as e:
-        print(e.response.text)
-        raise
-
+        _migrate(src, dst, repo, checkout)
     finally:
-        if key.exists:
-            src.remove_public_key(key.public_key)
-            dst.remove_public_key(key.public_key)
-
-            key.remove()
+        shutil.rmtree(checkout)
 
 
-def run(command, output=False):
-    log.debug(command)
-    if output:
-        return subprocess.check_output(command, shell=True)
-    else:
-        return subprocess.call(command, shell=True)
+def _migrate(src, dst, repo, checkout):
+    log.info("Migrating repo %s -> git data", repo)
+
+    src_url = src.git_url(repo)
+    log.info("Migrating repo %s -> git data -> cloning from %s", repo, src_url)
+    call(['git', 'clone', '--mirror', src_url, checkout])
+
+    os.chdir(checkout)
+
+    dst_url = dst.git_url(repo)
+    log.info("Migrating repo %s -> git data -> pushing to %s", repo, dst_url)
+    call(['git', 'remote', 'add', 'dest', dst_url])
+    call(['git', 'push', '--mirror', 'dest'])

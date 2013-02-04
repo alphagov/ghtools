@@ -186,7 +186,13 @@ class GithubOrganisation(object):
 
     @property
     def hostname(self):
-        return urlparse.urlparse(self.client.root).netloc.split(":")[0]
+        return urlparse.urlparse(self.client.root).netloc.split(':')[0]
+
+    def git_url(self, repo):
+        return 'git@{0}:{1}/{2}'.format(self.hostname, self.organisation, repo)
+
+    def wiki_url(self, repo):
+        return '{0}.wiki'.format(self.git_url(repo))
 
     def full_name(self, name):
         return '{0}/{1}'.format(self.organisation, name)
