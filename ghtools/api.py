@@ -191,8 +191,32 @@ class GithubOrganisation(object):
     def full_name(self, name):
         return '{0}/{1}'.format(self.organisation, name)
 
+    def close_issue(self, repo, issue):
+        url = '/repos/{0}/issues/{1}'.format(self.full_name(repo), issue['number'])
+        self.client.patch(url, data={'state': 'closed'})
+
+    def open_issue(self, repo, issue):
+        url = '/repos/{0}/issues/{1}'.format(self.full_name(repo), issue['number'])
+        self.client.patch(url, data={'state': 'open'})
+
+    def create_issue(self, repo, issue):
+        url = '/repos/{0}/issues'.format(self.full_name(repo))
+        self.client.post(url, data=issue)
+
+    def create_issue_comment(self, repo, issue, comment):
+        url = '/repos/{0}/issues/{1}/comments'.format(self.full_name(repo), issue['number'])
+        return self.client.post(url, data=comment)
+
+    def create_pull(self, repo, pull):
+        url = '/repos/{0}/pulls'.format(self.full_name(repo))
+        self.client.post(url, data=pull)
+
     def list_issues(self, name):
         return sorted(self._list_all_things(name, 'issues'), key=lambda i: i['number'])
+
+    def list_issue_comments(self, name, issue):
+        url = '/repos/{0}/issues/{1}/comments'.format(self.full_name(name), issue['number'])
+        return self.client.paged_get(url)
 
     def list_pulls(self, name):
         return sorted(self._list_all_things(name, 'pulls'), key=lambda i: i['number'])

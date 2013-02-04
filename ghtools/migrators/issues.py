@@ -1,72 +1,119 @@
-import json
 import logging
+import textwrap
 
 from ghtools.api import GithubAPIError
 
 log = logging.getLogger(__name__)
 
 
-def migrate(src, dst, name):
-    src_issues = src.list_issues(name)
-    dst_issues = dict((i['number'], i) for i in dst.list_issues(name))
+class IssueMigrator(object):
 
-    src_pulls = src.list_pulls(name)
-    dst_pulls = dict((i['number'], i) for i in dst.list_pulls(name))
+    def __init__(self, src, dst, repo):
+        self.src = src
+        self.dst = dst
+        self.repo = repo
 
-    try:
-        for issue in src_issues:
-            if issue['number'] not in dst_issues:
-                payload = {
-                    'title': issue['title'],
-                    'body': generate_issue_body(issue),
-                    # 'assignee':  issue['assignee'], # cannot migrate until users have been migrated
-                    'milestone': issue['milestone'],
-                    'labels': [label['name'] for label in issue['labels']]
-                }
-                dst_issue = dst.client.post('/repos/{0}/issues'.format(dst.full_name(name)), data=payload).json
-                dst_issues[dst_issue['number']] = dst_issue
+    def migrate(self):
+        log.debug("Migrating repo %s -> issues", self.repo)
 
-                add_comments(src, dst, name, issue)
+        for issue in self.src.list_issues(self.repo):
+            self._migrate_issue(issue)
 
-            if issue['state'] != dst_issues[issue['number']]['state']:
-                payload = {'state': issue['state']}
-                dst.client.patch('/repos/{0}/issues/{1}'.format(dst.full_name(name), issue['number']), data=payload)
+        for pull in self.src.list_pulls(self.repo):
+            self._migrate_pull(pull)
 
-        for pull in src_pulls:
-            try:
-                if pull['number'] not in dst_pulls:
-                    payload = {
-                        'issue': pull['number'],
-                        'head': pull['head']['sha'],
-                        'base': pull['base']['sha']
-                    }
-                    dst_pull = dst.client.post('/repos/{0}/pulls'.format(dst.full_name(name)), data=payload).json
-                    dst_pulls[dst_pull['number']] = dst_pull
+    def _migrate_issue(self, issue):
+        log.debug("Migrating repo %s -> issues -> #%s", self.repo, issue['number'])
 
-                if pull['state'] != dst_pulls[pull['number']]['state']:
-                    payload = {'state': pull['state']}
-                    dst.client.patch('/repos/{0}/pulls/{2}'.format(dst.full_name(name), issue['number']), data=payload)
-            except GithubAPIError as e:
-                if e.response.status_code == 500:
-                    log.error("Failed to migrate pull request, maybe the branch was deleted?")
-                else:
-                    raise
-    except GithubAPIError as e:
-        print(e.response.text)
-        raise
-
-
-def generate_issue_body(issue):
-    return u"""**Migrated from github.com**\n[original]({0})\n\n{1}""".format(issue['html_url'], issue['body'])
-
-
-def add_comments(src, dst, name, issue):
-    for comment in src.client.get('/repos/{0}/issues/{1}/comments'.format(src.full_name(name), issue['number'])).json:
         payload = {
-            'body': generate_comment_body(issue, comment)
+            'title': issue['title'],
+            'body': self._generate_issue_body(issue),
+            # 'assignee':  issue['assignee'], # cannot migrate until users have been migrated
+            'milestone': issue['milestone'],
+            'labels': [label['name'] for label in issue['labels']]
         }
-        dst.client.post('/repos/{0}/issues/{1}/comments'.format(dst.full_name(name), issue['number']), data=json.dumps(payload))
+
+        self.dst.create_issue(self.repo, payload)
+
+        issue_comments = self.src.list_issue_comments(self.repo, issue)
+        sorted_comments = sorted(issue_comments, key=lambda x: x['created_at'])
+
+        should_close = (issue['state'] == 'closed')
+
+        for comment in sorted_comments:
+            if should_close and comment['created_at'] > issue['closed_at']:
+                self.dst.close_issue(self.repo, issue)
+                should_close = False
+
+            payload = {'body': self._generate_comment_body(issue, comment)}
+            self.dst.create_issue_comment(self.repo, issue, payload)
+
+        if should_close:
+            self.dst.close_issue(self.repo, issue)
+
+    def _migrate_pull(self, pull):
+        log.debug("Migrating repo %s -> issues -> PR #%s", self.repo, pull['number'])
+
+        payload = {
+            'issue': pull['number'],
+            'head': pull['head']['sha'],
+            'base': pull['base']['sha']
+        }
+
+        try:
+            self.dst.create_pull(self.repo, payload)
+        except GithubAPIError as e:
+            if e.response.status_code == 500:
+                log.error("Failed to migrate pull request, maybe the branch was deleted?")
+            else:
+                raise
+
+    def _generate_issue_body(self, issue):
+        issue_template = textwrap.dedent("""
+        {body}
+
+        <table>
+        <legend><em>Details for original issue <a href="{url}">{shortname}</a>:</em></legend>
+        <tr><td><strong>Author</strong></td><td><a href="{author_url}">{author}</a></td></tr>
+        <tr><td><strong>Created at<strong></td><td>{created_at}</td></tr>
+        </table>
+        """)
+
+        author = _get_author(self.src.client, issue['user']['login'])
+        shortname = '{0}#{1}'.format(self.src.full_name(self.repo), issue['number'])
+
+        return issue_template.format(author=author['login'],
+                                     author_url=author['html_url'],
+                                     body=issue['body'],
+                                     created_at=issue['created_at'],
+                                     url=issue['html_url'],
+                                     shortname=shortname)
+
+    def _generate_comment_body(self, issue, comment):
+        comment_template = textwrap.dedent("""
+        {body}
+
+        <table>
+        <legend><em>Details for <a href="{url}">original comment</a>:</em></legend>
+        <tr><td><strong>Author</strong></td><td><a href="{author_url}">{author}</a></td></tr>
+        <tr><td><strong>Created at<strong></td><td>{created_at}</td></tr>
+        </table>
+        """)
+
+        author = _get_author(self.src.client, comment['user']['login'])
+        comment_url = '{0}#issuecomment-{1}'.format(issue['html_url'], comment['id'])
+
+        return comment_template.format(author=author['login'],
+                                       author_url=author['html_url'],
+                                       body=issue['body'],
+                                       created_at=comment['created_at'],
+                                       url=comment_url)
 
 
-def generate_comment_body(issue, comment):
-    return u"""**Migrated from github.com**\n[original]({0})\n\n{1}""".format(issue['html_url'], comment['body'])
+def migrate(src, dst, repo):
+    return IssueMigrator(src, dst, repo).migrate()
+
+
+def _get_author(client, login):
+    return client.get('/users/{0}'.format(login)).json
+
