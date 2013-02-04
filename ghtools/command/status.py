@@ -3,15 +3,14 @@ from __future__ import print_function
 import json
 import logging
 
-from argh import *
-from ghtools.api import GithubAPIClient
+from argh import ArghParser, arg, dispatch_command
+from ghtools import cli
 
 log = logging.getLogger(__name__)
 parser = ArghParser(description="Set commit/branch build status")
 
 
-@arg('-n', '--nickname', default='public', help='GitHub instance nickname')
-@arg('repo', help='Repository name (e.g. "joebloggs/myapp")')
+@arg('repo', help='Repository identifier (e.g. joebloggs/myapp, enterprise:mycorp/myrepo)')
 @arg('sha', help='Git SHA1')
 @arg('state', help='State to attach', choices=['pending', 'success', 'error', 'failure'])
 @arg('-d', '--description', help='Status description')
@@ -20,7 +19,8 @@ def status(args):
     """
     Set build status for a commit on GitHub
     """
-    c = GithubAPIClient(nickname=args.nickname)
+    ident = cli.parse_identifier(args.repo, require_repo=True)
+    c = cli.get_client(ident.github)
 
     payload = {'state': args.state}
 
@@ -30,7 +30,8 @@ def status(args):
     if args.url is not None:
         payload['target_url'] = args.url
 
-    res = c.post('/repos/{0}/statuses/{1}'.format(args.repo, args.sha), data=payload)
+    with cli.catch_api_errors():
+        res = c.post('/repos/{0}/statuses/{1}'.format(args.org, args.sha), data=payload)
 
     print(json.dumps(res.json, indent=2))
 
