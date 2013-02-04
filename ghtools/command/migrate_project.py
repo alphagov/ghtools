@@ -1,7 +1,5 @@
 from __future__ import print_function
 
-import logging
-
 from argh import *
 from ghtools.api import GithubOrganisation
 from ghtools import migrators
@@ -11,6 +9,22 @@ from ghtools import migrators
 @arg('dst', help='Migration destination')
 @arg('project', help='Project to be migrated')
 def migrate_project(args):
+    """
+    Migrate a Github project from one Github instance to another.
+
+    Migration includes:
+        - Project metadata
+        - Git repository
+        - Issues & pull requests
+        - Comments
+        - Hooks
+
+    WARNING: This will copy the git repository verbatim. Any commits on the target repository
+    that are not also on the source will be lost.
+
+    Note: All issues and comments will be migrated as the target user with links back to the
+    source Github instance.
+    """
     src = GithubOrganisation.create(args.src)
     dst = GithubOrganisation.create(args.dst)
 
@@ -19,8 +33,6 @@ def migrate_project(args):
     migrators.issues.migrate(src, dst, args.project)
     migrators.comments.migrate(src, dst, args.project)
     migrators.hooks.migrate(src, dst, args.project)
-    # migrators.wiki.migrate(src, dst, args.project) # The wiki has to be visited on the target to create it.
-
 
 def main():
     dispatch_command(migrate_project)

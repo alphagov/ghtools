@@ -13,6 +13,7 @@ python_scripts = [
     'list-members',
     'login',
     'migrate-project',
+    'migrate-wiki',
     'migrate-teams',
     'org',
     'repo',
