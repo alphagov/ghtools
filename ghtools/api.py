@@ -111,6 +111,9 @@ class GithubAPIClient(object):
     def logged_in(self):
         return self.token is not None
 
+    def request(self, method, url, *args, **kwargs):
+        return self._req(method, self._url(url), *args, **kwargs)
+
     def delete(self, url, *args, **kwargs):
         return self._req('delete', self._url(url), *args, **kwargs)
 
