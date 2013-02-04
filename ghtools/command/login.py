@@ -23,13 +23,13 @@ def login_if_needed(gh, scopes):
     gh.login(username, password, scopes=scopes)
 
 
-@arg('-n', '--nickname', default='public', help='GitHub instance nickname')
 @arg('-s', '--scope', default=None, action='append', help='GitHub auth scopes to request')
+@arg('github', nargs='?', help='GitHub instance nickname (e.g "enterprise")')
 def login(args):
     """
     Log into a GitHub instance, and print the resulting OAuth token.
     """
-    c = GithubAPIClient(nickname=args.nickname)
+    c = GithubAPIClient(nickname=args.github)
 
     login_if_needed(c, args.scope)
 

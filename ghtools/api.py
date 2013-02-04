@@ -9,6 +9,8 @@ from ghtools import __version__
 
 log = logging.getLogger(__name__)
 
+DEFAULT_GITHUB = 'public'
+
 KNOWN_GITHUBS = {
     'public': 'https://api.github.com'
 }
@@ -23,10 +25,13 @@ class APIError(Exception):
 
 
 class GithubAPIClient(object):
-    def __init__(self, root=None, nickname='public'):
+    def __init__(self, root=None, nickname=None):
         self._session = requests.Session()
 
-        self.nickname = nickname
+        if nickname is not None:
+            self.nickname = nickname
+        else:
+            self.nickname = DEFAULT_GITHUB
         self.token = self._env('oauth_token')
 
         # Try to ascertain GitHub API root
