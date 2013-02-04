@@ -105,7 +105,7 @@ class IssueMigrator(object):
 
         return comment_template.format(author=author['login'],
                                        author_url=author['html_url'],
-                                       body=issue['body'],
+                                       body=comment['body'],
                                        created_at=comment['created_at'],
                                        url=comment_url)
 
