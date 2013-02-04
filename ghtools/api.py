@@ -67,7 +67,11 @@ class GithubAPIClient(object):
         if "data" in kwargs and (isinstance(kwargs['data'], int) or isinstance(kwargs['data'], dict)):
             kwargs['data'] = json.dumps(kwargs['data'])
 
+        if env.get("GHTOOLS_DEBUG", False):
+            print(method, url, args, kwargs)
         res = self._session.request(method, url, *args, **kwargs)
+        if env.get("GHTOOLS_DEBUG", False):
+            print(res, res.text, res.headers)
         if _raise:
             custom_raise_for_status(res)
         return res
