@@ -57,24 +57,45 @@ class IssueMigrator(object):
     def _migrate_pull(self, pull):
         log.debug("Migrating %s to %s -> issues -> PR #%s", self.src, self.dst, pull['number'])
 
-        payload = {
-            'issue': pull['number'],
-            'head': pull['head']['sha'],
-            'base': pull['base']['sha']
-        }
-
         if pull['head']['sha'] == pull['base']['sha']:
             log.warn('Skipping pull request migration: PR#%s', pull['number'])
             log.warn('Not creating PR with head.sha == base.sha (%s, %s)', pull['head']['sha'], pull['base']['sha'])
             return
 
+        # Attempt to create a pull request on the basis of human-readable
+        # refs first.
         try:
-            self.dst.create_pull(payload)
-        except GithubAPIError as e:
-            if e.response.status_code == 500:
-                log.error("Failed to migrate pull request, maybe the branch was deleted?")
-            else:
-                raise
+            self.dst.create_pull({'issue': pull['number'],
+                                  'head': pull['head']['ref'],
+                                  'base': pull['base']['ref']})
+        except GithubAPIError:
+            # Attempt to create a pull request with at least one
+            # human-readable ref
+            try:
+                self.dst.create_pull({'issue': pull['number'],
+                                      'head': pull['head']['sha'],
+                                      'base': pull['base']['ref']})
+
+            # Fall back to just creating the pull request with shas instead of
+            # refs
+            except GithubAPIError:
+                self.dst.create_pull({'issue': pull['number'],
+                                      'head': pull['head']['sha'],
+                                      'base': pull['base']['sha']})
+
+        # Add a note to tell people if the PR was ever merged
+        if pull.get('merged_at'):
+            merged_by = ''
+            if 'merged_by' in pull and pull['merged_by']['type'] == 'User':
+                author = _get_author(self.src.client, pull['merged_by']['login'])
+                merged_by = ' by [{0}]({1})'.format(author['login'], author['html_url'])
+
+            merged_in = ''
+            if 'merge_commit_sha' in pull:
+                merged_in = ' in {0}'.format(pull['merge_commit_sha'])
+
+            comment = {'body': '*Merged{0} at {1}{2}*'.format(merged_by, pull['merged_at'], merged_in)}
+            self.dst.create_issue_comment(pull, comment)
 
     def _generate_issue_body(self, issue):
         issue_template = textwrap.dedent(u"""
