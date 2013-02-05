@@ -7,30 +7,29 @@ from subprocess import call
 log = logging.getLogger(__name__)
 
 
-def migrate(src, dst, repo):
-    if not src.get_project(repo).json['has_wiki']:
-        log.info("Migrating repo %s -> wiki (skipping)", repo)
+def migrate(src, dst):
+    src_repo = src.client.get('/repos/{0}'.format(src.org_repo))
+    if not src_repo['has_wiki']:
+        log.info("Migrating %s to %s -> wiki (skipping)", src, dst)
         return
 
-    dst.client.patch('/repos/{0}'.format(dst.full_name(repo)), data={'has_wiki': 'true'})
+    dst.client.patch('/repos/{0}'.format(dst.org_repo), data={'has_wiki': 'true'})
 
     checkout = tempfile.mkdtemp()
     try:
-        _migrate(src, dst, repo, checkout)
+        _migrate(src, dst, checkout)
     finally:
         shutil.rmtree(checkout)
 
 
-def _migrate(src, dst, repo, checkout):
-    log.info("Migrating repo %s -> wiki", repo)
+def _migrate(src, dst, checkout):
+    log.info("Migrating %s to %s -> wiki", src, dst)
 
-    src_url = src.wiki_url(repo)
-    log.info("Migrating repo %s -> wiki -> cloning from %s", repo, src_url)
-    call(['git', 'clone', '--mirror', src_url, checkout])
+    log.info("Migrating %s to %s -> wiki -> cloning from %s", src, dst, src.wiki_url)
+    call(['git', 'clone', '--mirror', src.wiki_url, checkout])
 
     os.chdir(checkout)
 
-    dst_url = dst.wiki_url(repo)
-    log.info("Migrating repo %s -> wiki -> pushing to %s", repo, dst_url)
-    call(['git', 'remote', 'add', 'dest', dst_url])
+    log.info("Migrating %s to %s -> wiki -> pushing to %s", src, dst, dst.wiki_url)
+    call(['git', 'remote', 'add', 'dest', dst.wiki_url])
     call(['git', 'push', '--mirror', 'dest'])

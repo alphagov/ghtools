@@ -7,24 +7,22 @@ from subprocess import call
 log = logging.getLogger(__name__)
 
 
-def migrate(src, dst, repo):
+def migrate(src, dst):
     checkout = tempfile.mkdtemp()
     try:
-        _migrate(src, dst, repo, checkout)
+        _migrate(src, dst, checkout)
     finally:
         shutil.rmtree(checkout)
 
 
-def _migrate(src, dst, repo, checkout):
-    log.info("Migrating repo %s -> git data", repo)
+def _migrate(src, dst, checkout):
+    log.info("Migrating %s to %s -> git data", src, dst)
 
-    src_url = src.git_url(repo)
-    log.info("Migrating repo %s -> git data -> cloning from %s", repo, src_url)
-    call(['git', 'clone', '--mirror', src_url, checkout])
+    log.info("Migrating %s to %s -> git data -> cloning from %s", src, dst, src.git_url)
+    call(['git', 'clone', '--mirror', src.git_url, checkout])
 
     os.chdir(checkout)
 
-    dst_url = dst.git_url(repo)
-    log.info("Migrating repo %s -> git data -> pushing to %s", repo, dst_url)
-    call(['git', 'remote', 'add', 'dest', dst_url])
+    log.info("Migrating %s to %s -> git data -> pushing to %s", src, dst, dst.git_url)
+    call(['git', 'remote', 'add', 'dest', dst.git_url])
     call(['git', 'push', '--mirror', 'dest'])
