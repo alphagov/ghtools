@@ -43,7 +43,7 @@ class TestGithubAPIClient(RequestMockTestCase):
     def test_put(self):
         self.register_response('put', API_ROOT + '/baz', 200, {}, '{"message": "success"}')
         c = GithubAPIClient(nickname='test')
-        assert_equal(c.put('/baz').json, {'message': 'success'})
+        assert_equal(c.put('/baz').json(), {'message': 'success'})
 
     def test_delete(self):
         self.register_response('delete', API_ROOT + '/bat', 204, {}, '')

@@ -12,7 +12,7 @@ class Organisation(object):
     def get_repo(self, repo):
         url = '/repos/{0}/{1}'.format(self.org, repo)
         res = self.client.get(url)
-        return res.json
+        return res.json()
 
     def create_repo(self, repo):
         keys = [
@@ -26,7 +26,7 @@ class Organisation(object):
         ]
         payload = dict((k, repo[k]) for k in keys)
         res = self.client.post('/orgs/{0}/repos'.format(self.org), data=payload)
-        return res.json
+        return res.json()
 
     def list_members(self):
         return self.client.paged_get('/orgs/{0}/members'.format(self.org))

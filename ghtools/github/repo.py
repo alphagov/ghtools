@@ -23,7 +23,7 @@ class Repo(object):
     @property
     def ssh_url(self):
         res = self.client.get('/repos/{0}'.format(self.org_repo))
-        return res.json['ssh_url']
+        return res.json()['ssh_url']
 
     @property
     def wiki_ssh_url(self):
@@ -39,27 +39,27 @@ class Repo(object):
     def create_commit_comment(self, commit_id, comment):
         url = '/repos/{0}/commits/{1}/comments'.format(self.org_repo, commit_id)
         res = self.client.post(url, data=comment)
-        return res.json
+        return res.json()
 
     def create_hook(self, hook):
         url = '/repos/{0}/hooks'.format(self.org_repo)
         res = self.client.post(url, data=hook)
-        return res.json
+        return res.json()
 
     def create_issue(self, issue):
         url = '/repos/{0}/issues'.format(self.org_repo)
         res = self.client.post(url, data=issue)
-        return res.json
+        return res.json()
 
     def create_issue_comment(self, issue, comment):
         url = '/repos/{0}/issues/{1}/comments'.format(self.org_repo, issue['number'])
         res = self.client.post(url, data=comment)
-        return res.json
+        return res.json()
 
     def create_pull(self, pull):
         url = '/repos/{0}/pulls'.format(self.org_repo)
         res = self.client.post(url, data=pull)
-        return res.json
+        return res.json()
 
     def delete(self):
         return self.client.delete('/repos/{0}'.format(self.org_repo))
@@ -102,12 +102,12 @@ class Repo(object):
     def close_issue(self, issue):
         url = '/repos/{0}/issues/{1}'.format(self.org_repo, issue['number'])
         res = self.client.patch(url, data={'state': 'closed'})
-        return res.json
+        return res.json()
 
     def open_issue(self, issue):
         url = '/repos/{0}/issues/{1}'.format(self.org_repo, issue['number'])
         res = self.client.patch(url, data={'state': 'open'})
-        return res.json
+        return res.json()
 
     def set_build_status(self, sha, status):
         url = '/repos/{0}/statuses/{1}'.format(self.org_repo, sha)

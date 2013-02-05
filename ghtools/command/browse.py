@@ -26,7 +26,7 @@ def browse(args):
             print("{0}: {1}".format(k, v))
 
         print()
-        if res.json is not None:
+        if res.json() is not None:
             print(json.dumps(res.json, indent=2))
         else:
             print(res.content)

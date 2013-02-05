@@ -139,5 +139,5 @@ def migrate(src, dst):
 
 def _get_author(client, login, _author_memo={}):
     if login not in _author_memo:
-        _author_memo[login] = client.get('/users/{0}'.format(login)).json
+        _author_memo[login] = client.get('/users/{0}'.format(login)).json()
     return _author_memo[login]

@@ -10,7 +10,7 @@ log = logging.getLogger(__name__)
 
 
 def migrate(src, dst):
-    src_repo = src.client.get('/repos/{0}'.format(src.org_repo)).json
+    src_repo = src.client.get('/repos/{0}'.format(src.org_repo)).json()
     if not src_repo['has_wiki']:
         log.info("Migrating %s to %s -> wiki (skipping)", src, dst)
         return

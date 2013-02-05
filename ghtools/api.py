@@ -92,7 +92,7 @@ class GithubAPIClient(object):
             data=json.dumps(data)
         )
 
-        self.token = res.json['token']
+        self.token = res.json()['token']
 
     @property
     def token(self):
@@ -128,7 +128,7 @@ class GithubAPIClient(object):
 
     def paged_get(self, url, *args, **kwargs):
         for res in paged(self._session, 'get', self._url(url)):
-            for repo in res.json:
+            for repo in res.json():
                 yield repo
 
     def __str__(self):

@@ -33,7 +33,7 @@ def status(args):
     with cli.catch_api_errors():
         res = repo.set_build_status(args.sha, payload)
 
-    print(json.dumps(res.json, indent=2))
+    print(json.dumps(res.json(), indent=2))
 parser.set_default_command(status)
 
 

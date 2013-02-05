@@ -1,6 +1,6 @@
 import json
 
-from mock import MagicMock, PropertyMock, patch
+from mock import MagicMock, patch
 
 from requests import Response
 from requests.structures import CaseInsensitiveDict
@@ -30,9 +30,7 @@ class RequestMockTestCase(object):
         r.status_code = status_code
         r.headers = CaseInsensitiveDict(headers if headers is not None else {})
         r.content = content
-        print content
-        json_prop = PropertyMock(side_effect=lambda: json.loads(content))
-        type(r).json = json_prop
+        r.json.side_effect = lambda: json.loads(content)
         r.ok = status_code < 400
         return r
 

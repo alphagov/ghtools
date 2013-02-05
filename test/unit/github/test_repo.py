@@ -23,11 +23,11 @@ class TestRepo(object):
             Repo('test:foo')
 
     def test_ssh_url(self):
-        self.mock_client.get.return_value.json = {'ssh_url': 'git@github.test:foo/bar.git'}
+        self.mock_client.get.return_value.json.return_value = {'ssh_url': 'git@github.test:foo/bar.git'}
         assert_equal(self.r.ssh_url, 'git@github.test:foo/bar.git')
 
     def test_wiki_ssh_url(self):
-        self.mock_client.get.return_value.json = {'ssh_url': 'git@github.test:foo/bar.git'}
+        self.mock_client.get.return_value.json.return_value = {'ssh_url': 'git@github.test:foo/bar.git'}
         assert_equal(self.r.wiki_ssh_url, 'git@github.test:foo/bar.wiki.git')
 
     def test_create_commit_comment(self):

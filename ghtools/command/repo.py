@@ -30,7 +30,7 @@ def get(args):
     repo = Repo(args.repo)
 
     with cli.catch_api_errors():
-        return json.dumps(repo.get().json, indent=2)
+        return json.dumps(repo.get().json(), indent=2)
 parser.add_commands([get])
 
 

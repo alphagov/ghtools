@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 from ghtools import __version__
 
 requirements = [
-    'requests==0.14.2',
+    'requests==1.1.0',
     'argh==0.17.2'
 ]
 
