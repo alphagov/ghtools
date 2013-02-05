@@ -27,4 +27,5 @@ def _generate_comment_body(author, comment):
     return comment_template.format(author=author['login'],
                                    author_url=author['html_url'],
                                    body=comment['body'],
+                                   created_at=comment['created_at'],
                                    url=comment['html_url'])
