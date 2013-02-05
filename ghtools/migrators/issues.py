@@ -63,6 +63,11 @@ class IssueMigrator(object):
             'base': pull['base']['sha']
         }
 
+        if pull['head']['sha'] == pull['base']['sha']:
+            log.warn('Skipping pull request migration: PR#%s', pull['number'])
+            log.warn('Not creating PR with head.sha == base.sha (%s, %s)', pull['head']['sha'], pull['base']['sha'])
+            return
+
         try:
             self.dst.create_pull(payload)
         except GithubAPIError as e:
