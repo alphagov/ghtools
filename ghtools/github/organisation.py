@@ -1,6 +1,3 @@
-import logging
-import urlparse
-
 from ghtools.identifier import Identifier
 from ghtools.util import make_client
 
