@@ -108,10 +108,6 @@ class GithubAPIClient(object):
     def logged_in(self):
         return self.token is not None
 
-    @property
-    def hostname(self):
-        return urlparse.urlparse(self.root).netloc.split(':')[0]
-
     def request(self, method, url, *args, **kwargs):
         return self._req(method, self._url(url), *args, **kwargs)
 

@@ -13,7 +13,6 @@ class TestRepo(object):
         self.patcher = patch('ghtools.github.repo.make_client')
         self.mock_client_cons = self.patcher.start()
         self.mock_client = self.mock_client_cons.return_value
-        self.mock_client.hostname = 'github.test'
         self.r = Repo('test:foo/bar')
 
     def teardown(self):
