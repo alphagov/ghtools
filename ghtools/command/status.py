@@ -5,6 +5,7 @@ import logging
 
 from argh import ArghParser, arg
 from ghtools import cli
+from ghtools.github.repo import Repo
 
 log = logging.getLogger(__name__)
 parser = ArghParser(description="Set commit/branch build status")
@@ -19,8 +20,7 @@ def status(args):
     """
     Set build status for a commit on GitHub
     """
-    ident = cli.parse_identifier(args.repo, require_repo=True)
-    c = cli.get_client(ident.github)
+    repo = Repo(args.repo)
 
     payload = {'state': args.state}
 
@@ -31,7 +31,7 @@ def status(args):
         payload['target_url'] = args.url
 
     with cli.catch_api_errors():
-        res = c.post('/repos/{0}/statuses/{1}'.format(args.org, args.sha), data=payload)
+        res = repo.set_build_status(args.sha, payload)
 
     print(json.dumps(res.json, indent=2))
 parser.set_default_command(status)

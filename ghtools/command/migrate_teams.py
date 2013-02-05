@@ -2,7 +2,6 @@ import logging
 from argh import arg, dispatch_command
 
 from ghtools import cli
-from ghtools.exceptions import GithubAPIError
 from ghtools.github import Organisation
 from ghtools.migrators import teams
 

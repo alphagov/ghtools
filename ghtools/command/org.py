@@ -4,6 +4,7 @@ import json
 
 from argh import ArghParser, arg
 from ghtools import cli
+from ghtools.github.organisation import Organisation
 
 parser = ArghParser(description="Interact with a GitHub organisation")
 parser.add_argument('org',
@@ -21,10 +22,9 @@ def repos(args):
     """
     Print a list of organisation repositories
     """
-    ident = cli.parse_identifier(args.org)
-    c = cli.get_client(ident.github)
     with cli.catch_api_errors():
-        for repo in c.paged_get('/orgs/{0}/repos'.format(ident.org)):
+        org = Organisation(args.org)
+        for repo in org.list_repos():
             if args.json:
                 print(json.dumps(repo, indent=2))
             else:
@@ -37,14 +37,13 @@ def members(args):
     """
     Print a list of organisation members
     """
-    ident = cli.parse_identifier(args.org)
-    c = cli.get_client(ident.github)
     with cli.catch_api_errors():
-        for repo in c.paged_get('/orgs/{0}/members'.format(ident.org)):
+        org = Organisation(args.org)
+        for member in org.list_members():
             if args.json:
-                print(json.dumps(repo, indent=2))
+                print(json.dumps(member, indent=2))
             else:
-                print(repo['login'])
+                print(member['login'])
 parser.add_commands([members])
 
 

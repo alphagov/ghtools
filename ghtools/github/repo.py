@@ -61,6 +61,12 @@ class Repo(object):
         res = self.client.post(url, data=pull)
         return res.json
 
+    def delete(self):
+        return self.client.delete('/repos/{0}'.format(self.org_repo))
+
+    def get(self):
+        return self.client.get('/repos/{0}'.format(self.org_repo))
+
     def list_commit_comments(self):
         url = '/repos/{0}/comments'.format(self.org_repo)
         return self.client.paged_get(url.format(self.org_repo, 'open'))
@@ -102,6 +108,10 @@ class Repo(object):
         url = '/repos/{0}/issues/{1}'.format(self.org_repo, issue['number'])
         res = self.client.patch(url, data={'state': 'open'})
         return res.json
+
+    def set_build_status(self, sha, status):
+        url = '/repos/{0}/statuses/{1}'.format(self.org_repo, sha)
+        return self.client.post(url, data=status)
 
     def __str__(self):
         return '<Repo {0}>'.format(self._ident)

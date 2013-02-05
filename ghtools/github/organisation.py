@@ -28,6 +28,12 @@ class Organisation(object):
         res = self.client.post('/orgs/{0}/repos'.format(self.org), data=payload)
         return res.json
 
+    def list_members(self):
+        return self.client.paged_get('/orgs/{0}/members'.format(self.org))
+
+    def list_repos(self):
+        return self.client.paged_get('/orgs/{0}/repos'.format(self.org))
+
     def list_teams(self):
         return self.client.paged_get('/orgs/{0}/teams'.format(self.org))
 

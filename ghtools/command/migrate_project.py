@@ -5,7 +5,7 @@ import logging
 from argh import arg, dispatch_command
 from ghtools.github.organisation import Organisation
 from ghtools.github.repo import Repo
-from ghtools import migrators
+from ghtools import migrators, cli
 
 log = logging.getLogger(__name__)
 
@@ -29,22 +29,23 @@ def migrate_project(args):
     Note: All issues and comments will be migrated as the target user with
     links back to the source Github instance.
     """
-    src_org = Organisation(args.src)
-    dst_org = Organisation(args.dst)
-    src = Repo(args.src)
-    dst = Repo(args.dst)
+    with cli.catch_api_errors():
+        src_org = Organisation(args.src)
+        dst_org = Organisation(args.dst)
+        src = Repo(args.src)
+        dst = Repo(args.dst)
 
-    # Create the repo object
-    log.info("Migrating %s to %s -> creating repo", src, dst)
-    project = src_org.get_repo(src.repo)
-    project['name'] = dst.repo
-    dst_org.create_repo(project)
+        # Create the repo object
+        log.info("Migrating %s to %s -> creating repo", src, dst)
+        project = src_org.get_repo(src.repo)
+        project['name'] = dst.repo
+        dst_org.create_repo(project)
 
-    # Migrate repo data
-    migrators.repo.migrate(src, dst)
-    migrators.issues.migrate(src, dst)
-    migrators.comments.migrate(src, dst)
-    migrators.hooks.migrate(src, dst)
+        # Migrate repo data
+        migrators.repo.migrate(src, dst)
+        migrators.issues.migrate(src, dst)
+        migrators.comments.migrate(src, dst)
+        migrators.hooks.migrate(src, dst)
 
 
 def main():

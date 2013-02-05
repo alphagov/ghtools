@@ -4,6 +4,7 @@ import json
 
 from argh import ArghParser, arg
 from ghtools import cli
+from ghtools.api import GithubAPIClient
 
 parser = ArghParser(description="Browse the GitHub API")
 
@@ -15,19 +16,20 @@ def browse(args):
     """
     Print the GitHub API response at the given URL
     """
-    c = cli.get_client(args.github)
-    res = c.request(args.method, args.url, _raise=False)
+    with cli.catch_api_errors():
+        client = GithubAPIClient(nickname=args.github)
+        res = client.request(args.method, args.url, _raise=False)
 
-    print('HTTP/1.1 {0} {1}'.format(res.status_code, res.reason))
+        print('HTTP/1.1 {0} {1}'.format(res.status_code, res.reason))
 
-    for k, v in res.headers.items():
-        print("{0}: {1}".format(k, v))
+        for k, v in res.headers.items():
+            print("{0}: {1}".format(k, v))
 
-    print()
-    if res.json is not None:
-        print(json.dumps(res.json, indent=2))
-    else:
-        print(res.content)
+        print()
+        if res.json is not None:
+            print(json.dumps(res.json, indent=2))
+        else:
+            print(res.content)
 parser.set_default_command(browse)
 
 

@@ -2,6 +2,7 @@ from __future__ import print_function
 import json
 
 from argh import *
+from ghtools import cli
 from ghtools.github import Organisation
 from collections import defaultdict
 import csv
@@ -14,20 +15,19 @@ def list_members(args):
     """
     List all members of an organisation along with the teams they're in.
     """
+    with cli.catch_api_errors():
+        org = Organisation(args.org)
 
-    org = Organisation(args.org)
+        members = defaultdict(list)
+        for team in org.list_teams():
+            for member in org.list_team_members(team):
+                members[member['login']].append(team['name'])
 
-    members = defaultdict(list)
-    for team in org.client.paged_get('/orgs/{0}/teams'.format(org.organisation)):
-        for member in org.client.paged_get('/teams/{0}/members'.format(team['id'])):
-            members[member["login"]].append(team["name"])
+        writer = csv.writer(sys.stdout, delimiter=',', quotechar='"')
 
-    writer = csv.writer(sys.stdout, delimiter=',', quotechar='"')
-
-    for member in org.client.paged_get('/orgs/{0}/members'.format(org.organisation)):
-        if member["type"] == "User":
-            writer.writerow([member['login']] + members[member['login']])
-
+        for member in org.list_members():
+            if member['type'] == 'User':
+                writer.writerow([member['login']] + members[member['login']])
 
 def main():
     dispatch_command(list_members)
