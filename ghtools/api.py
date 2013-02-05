@@ -108,6 +108,10 @@ class GithubAPIClient(object):
     def logged_in(self):
         return self.token is not None
 
+    @property
+    def hostname(self):
+        return urlparse.urlparse(self.root).netloc.split(':')[0]
+
     def request(self, method, url, *args, **kwargs):
         return self._req(method, self._url(url), *args, **kwargs)
 
@@ -163,107 +167,3 @@ def custom_raise_for_status(res):
         for k, v in err.__dict__.items():
             setattr(newerr, k, v)
         raise newerr
-
-
-class GithubOrganisation(object):
-    @classmethod
-    def create(cls, path):
-        nickname, organisation = path.split(':', 2)
-
-        return GithubOrganisation(nickname, organisation, GithubAPIClient(nickname=nickname))
-
-    def __init__(self, nickname, organisation, client):
-        self.nickname = nickname
-        self.organisation = organisation
-        self.client = client
-
-    @property
-    def hostname(self):
-        return urlparse.urlparse(self.client.root).netloc.split(':')[0]
-
-    def git_url(self, repo):
-        return 'git@{0}:{1}/{2}'.format(self.hostname, self.organisation, repo)
-
-    def wiki_url(self, repo):
-        return '{0}.wiki'.format(self.git_url(repo))
-
-    def full_name(self, name):
-        return '{0}/{1}'.format(self.organisation, name)
-
-    def close_issue(self, repo, issue):
-        url = '/repos/{0}/issues/{1}'.format(self.full_name(repo), issue['number'])
-        self.client.patch(url, data={'state': 'closed'})
-
-    def open_issue(self, repo, issue):
-        url = '/repos/{0}/issues/{1}'.format(self.full_name(repo), issue['number'])
-        self.client.patch(url, data={'state': 'open'})
-
-    def create_issue(self, repo, issue):
-        url = '/repos/{0}/issues'.format(self.full_name(repo))
-        self.client.post(url, data=issue)
-
-    def create_issue_comment(self, repo, issue, comment):
-        url = '/repos/{0}/issues/{1}/comments'.format(self.full_name(repo), issue['number'])
-        return self.client.post(url, data=comment)
-
-    def create_pull(self, repo, pull):
-        url = '/repos/{0}/pulls'.format(self.full_name(repo))
-        self.client.post(url, data=pull)
-
-    def list_issues(self, name):
-        return sorted(self._list_all_things(name, 'issues'), key=lambda i: i['number'])
-
-    def list_issue_comments(self, name, issue):
-        url = '/repos/{0}/issues/{1}/comments'.format(self.full_name(name), issue['number'])
-        return self.client.paged_get(url)
-
-    def list_pulls(self, name):
-        return sorted(self._list_all_things(name, 'pulls'), key=lambda i: i['number'])
-
-    def _list_things(self, project, type, state):
-        return list(self.client.paged_get('/repos/{0}/{1}?direction=asc&state={2}'.format(self.full_name(project), type, state)))
-
-    def _list_all_things(self, project, type):
-        return self._list_things(project, type, 'closed') + self._list_things(project, type, 'open')
-
-    def get_project(self, name):
-        return self.client.get('/repos/{0}'.format(self.full_name(name)))
-
-    def create_project(self, project):
-        try:
-            self.get_project(project["name"])
-        except GithubAPIError as e:
-            if e.response.status_code != 404:
-                raise
-
-            keys = [
-                'name',
-                'description',
-                'homepage',
-                'private',
-                'has_issues',
-                'has_wiki',
-                'has_downloads'
-            ]
-            payload = dict((k, project[k]) for k in keys)
-            self.client.post('/orgs/{0}/repos'.format(self.organisation), data=json.dumps(payload))
-            log.info("Created %s on %s", self.full_name(project["name"]), self.client)
-        else:
-            log.debug("%s already exists on %s, skipping...", self.full_name(project["name"]), self.client)
-
-    def add_public_key(self, title, key):
-        self.client.post("/user/keys", data=json.dumps({
-            "title": title,
-            "key": key
-        }))
-
-    def remove_public_key(self, to_remove):
-        for key in self.client.get("/user/keys").json:
-            if key["key"] == to_remove:
-                self.client.delete("/user/keys/{0}".format(key["id"]))
-                return True
-
-        return False
-
-    def __str__(self):
-        return '<GithubOrganisation {0}, {1}>'.format(self.nickname, self.organisation)

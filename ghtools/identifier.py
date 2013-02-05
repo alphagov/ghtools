@@ -1,5 +1,7 @@
 from collections import namedtuple
 
+from ghtools.api import DEFAULT_GITHUB
+
 _Identifier = namedtuple('Identifier', 'github org repo')
 
 class Identifier(_Identifier):
@@ -28,7 +30,7 @@ class Identifier(_Identifier):
         parts = identstring.split(':', 1)
 
         if len(parts) == 1:
-            github = 'public'
+            github = DEFAULT_GITHUB
             remainder = parts[0]
         else:
             github, remainder = parts
@@ -42,3 +44,12 @@ class Identifier(_Identifier):
             org, repo = parts
 
         return Identifier(github, org, repo)
+
+    def __str__(self):
+        out = ''
+        if self.github != DEFAULT_GITHUB:
+            out += self.github + ':'
+        out += self.org
+        if self.repo is not None:
+            out += '/{0}'.format(self.repo)
+        return out

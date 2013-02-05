@@ -2,7 +2,7 @@ from __future__ import print_function
 import json
 
 from argh import *
-from ghtools.api import GithubOrganisation
+from ghtools.github import Organisation
 from collections import defaultdict
 import csv
 import sys
@@ -15,7 +15,7 @@ def list_members(args):
     List all members of an organisation along with the teams they're in.
     """
 
-    org = GithubOrganisation.create(args.org)
+    org = Organisation(args.org)
 
     members = defaultdict(list)
     for team in org.client.paged_get('/orgs/{0}/teams'.format(org.organisation)):

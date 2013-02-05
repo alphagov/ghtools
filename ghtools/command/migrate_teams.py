@@ -1,9 +1,9 @@
 import logging
-from argh import *
+from argh import arg, dispatch_command
 import csv
 
 from ghtools.exceptions import GithubAPIError
-from ghtools import migrators
+from ghtools.github import Organisation
 
 log = logging.getLogger(__name__)
 
@@ -12,8 +12,8 @@ log = logging.getLogger(__name__)
 @arg('dst', help='Migration destination')
 @arg('members', help='Mapping file for user accounts from src to dst')
 def migrate_teams(args):
-    src = GithubOrganisation.create(args.src)
-    dst = GithubOrganisation.create(args.dst)
+    src = Organisation(args.src)
+    dst = Organisation(args.dst)
 
     members = {}
     with open(args.members, 'r') as f:

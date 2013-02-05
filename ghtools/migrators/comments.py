@@ -1,14 +1,30 @@
-def migrate(src, dst, name):
-    for comment in src.client.get('/repos/{0}/comments'.format(src.full_name(name))).json:
+import textwrap
+
+
+def migrate(src, dst):
+    for comment in src.list_commit_comments():
+        author_login = comment['user']['login']
+        author = src.client.get('/users/{0}'.format(author_login)).json
+        body = _generate_comment_body(author, comment)
+
         payload = {
-            'body': generate_body(comment),
+            'body': body,
             'path': comment['path'],
             'position': comment['position'],
             'line': comment['line']
         }
 
-        dst.client.post('/repos/{0}/commits/{1}/comments'.format(dst.full_name(name), comment['commit_id']), data=payload)
+        dst.create_commit_comment(comment['commit_id'], payload)
 
 
-def generate_body(comment):
-    return u"**Migrated from github.com**\n[original]({0})\n\n{1}".format(comment['html_url'], comment['body'])
+def _generate_comment_body(author, comment):
+    comment_template = textwrap.dedent(u"""
+    <a href="{author_url}">{author}</a>: {body}
+
+    <em><a href="{url}">Original comment</a> created at {created_at}.</em>
+    """)
+
+    return comment_template.format(author=author['login'],
+                                   author_url=author['html_url'],
+                                   body=comment['body'],
+                                   url=comment['html_url'])

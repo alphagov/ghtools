@@ -5,6 +5,7 @@ from mock import MagicMock, PropertyMock, patch
 from requests import Response
 from requests.structures import CaseInsensitiveDict
 
+
 class RequestMockTestCase(object):
 
     def setup(self):
@@ -43,5 +44,3 @@ class RequestMockTestCase(object):
 
     def unregister_response(self, method, url):
         self._urls.pop((method, url))
-
-

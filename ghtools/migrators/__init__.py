@@ -1,4 +1,3 @@
-from . import project
 from . import repo
 from . import issues
 from . import comments

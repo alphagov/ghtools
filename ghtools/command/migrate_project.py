@@ -1,13 +1,12 @@
 from __future__ import print_function
 
-from argh import *
-from ghtools.api import GithubOrganisation
+from argh import arg, dispatch_command
+from ghtools.github.organisation import Organisation
+from ghtools.github.repo import Repo
 from ghtools import migrators
 
-
-@arg('src', help='Migration source')
-@arg('dst', help='Migration destination')
-@arg('project', help='Project to be migrated')
+@arg('src', help='Migration source identifier (e.g. rails/rails)')
+@arg('dst', help='Migration destination identifier (e.g. enterprise:rails/rails)')
 def migrate_project(args):
     """
     Migrate a Github project from one Github instance to another.
@@ -19,20 +18,27 @@ def migrate_project(args):
         - Comments
         - Hooks
 
-    WARNING: This will copy the git repository verbatim. Any commits on the target repository
-    that are not also on the source will be lost.
+    WARNING: This will copy the git repository verbatim. Any commits on the
+    target repository that are not also on the source will be lost.
 
-    Note: All issues and comments will be migrated as the target user with links back to the
-    source Github instance.
+    Note: All issues and comments will be migrated as the target user with
+    links back to the source Github instance.
     """
-    src = GithubOrganisation.create(args.src)
-    dst = GithubOrganisation.create(args.dst)
+    src_org = Organisation(args.src)
+    dst_org = Organisation(args.dst)
+    src = Repo(args.src)
+    dst = Repo(args.dst)
 
-    migrators.project.migrate(src, dst, args.project)
-    migrators.repo.migrate(src, dst, args.project)
-    migrators.issues.migrate(src, dst, args.project)
-    migrators.comments.migrate(src, dst, args.project)
-    migrators.hooks.migrate(src, dst, args.project)
+    # Create the repo object
+    project = src_org.get_repo(src.repo)
+    project['name'] = dst.repo
+    dst_org.create_repo(project)
+
+    # Migrate repo data
+    migrators.repo.migrate(src, dst)
+    migrators.issues.migrate(src, dst)
+    migrators.comments.migrate(src, dst)
+    migrators.hooks.migrate(src, dst)
 
 def main():
     dispatch_command(migrate_project)

@@ -2,6 +2,7 @@ from ..helpers import *
 
 from ghtools.identifier import Identifier
 
+
 class TestIdentifier(object):
 
     def test_org_only(self):
@@ -28,3 +29,14 @@ class TestIdentifier(object):
         assert_equal(i.org, 'myorg')
         assert_equal(i.repo, 'myrepo')
 
+    def test_str(self):
+        i = Identifier.from_string('foo:myorg/myrepo')
+        assert_equal(str(i), 'foo:myorg/myrepo')
+
+    def test_str_public(self):
+        i = Identifier.from_string('myorg/myrepo')
+        assert_equal(str(i), 'myorg/myrepo')
+
+    def test_str_repoless(self):
+        i = Identifier.from_string('foo:myorg')
+        assert_equal(str(i), 'foo:myorg')

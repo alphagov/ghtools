@@ -8,22 +8,25 @@ log = logging.getLogger(__name__)
 
 class IssueMigrator(object):
 
-    def __init__(self, src, dst, repo):
+    def __init__(self, src, dst):
         self.src = src
         self.dst = dst
-        self.repo = repo
 
     def migrate(self):
-        log.debug("Migrating repo %s -> issues", self.repo)
+        log.debug("Migrating %s to %s -> issues", self.src, self.dst)
 
-        for issue in self.src.list_issues(self.repo):
+        issues = self.src.list_issues(include_closed=True)
+        sorted_issues = sorted(issues, key=lambda x: x['number'])
+        for issue in sorted_issues:
             self._migrate_issue(issue)
 
-        for pull in self.src.list_pulls(self.repo):
+        pulls = self.src.list_pulls(include_closed=True)
+        sorted_pulls = sorted(pulls, key=lambda x: x['number'])
+        for pull in sorted_pulls:
             self._migrate_pull(pull)
 
     def _migrate_issue(self, issue):
-        log.debug("Migrating repo %s -> issues -> #%s", self.repo, issue['number'])
+        log.debug("Migrating %s to %s -> issues -> #%s", self.src, self.dst, issue['number'])
 
         payload = {
             'title': issue['title'],
@@ -33,26 +36,26 @@ class IssueMigrator(object):
             'labels': [label['name'] for label in issue['labels']]
         }
 
-        self.dst.create_issue(self.repo, payload)
+        self.dst.create_issue(payload)
 
-        issue_comments = self.src.list_issue_comments(self.repo, issue)
+        issue_comments = self.src.list_issue_comments(issue)
         sorted_comments = sorted(issue_comments, key=lambda x: x['created_at'])
 
         should_close = (issue['state'] == 'closed')
 
         for comment in sorted_comments:
             if should_close and comment['created_at'] > issue['closed_at']:
-                self.dst.close_issue(self.repo, issue)
+                self.dst.close_issue(issue)
                 should_close = False
 
             payload = {'body': self._generate_comment_body(issue, comment)}
-            self.dst.create_issue_comment(self.repo, issue, payload)
+            self.dst.create_issue_comment(issue, payload)
 
         if should_close:
-            self.dst.close_issue(self.repo, issue)
+            self.dst.close_issue(issue)
 
     def _migrate_pull(self, pull):
-        log.debug("Migrating repo %s -> issues -> PR #%s", self.repo, pull['number'])
+        log.debug("Migrating %s to %s -> issues -> PR #%s", self.src, self.dst, pull['number'])
 
         payload = {
             'issue': pull['number'],
@@ -61,7 +64,7 @@ class IssueMigrator(object):
         }
 
         try:
-            self.dst.create_pull(self.repo, payload)
+            self.dst.create_pull(payload)
         except GithubAPIError as e:
             if e.response.status_code == 500:
                 log.error("Failed to migrate pull request, maybe the branch was deleted?")
@@ -69,35 +72,27 @@ class IssueMigrator(object):
                 raise
 
     def _generate_issue_body(self, issue):
-        issue_template = textwrap.dedent("""
-        {body}
+        issue_template = textwrap.dedent(u"""
+        <a href="{author_url}">{author}</a>: {body}
 
-        <table>
-        <legend><em>Details for original issue <a href="{url}">{shortname}</a>:</em></legend>
-        <tr><td><strong>Author</strong></td><td><a href="{author_url}">{author}</a></td></tr>
-        <tr><td><strong>Created at<strong></td><td>{created_at}</td></tr>
-        </table>
+        <em><a href="{url}">Original issue</a> ({shortname}) created at {created_at}.</em>
         """)
 
         author = _get_author(self.src.client, issue['user']['login'])
-        shortname = '{0}#{1}'.format(self.src.full_name(self.repo), issue['number'])
+        shortname = '{0}#{1}'.format(self.src.org_repo, issue['number'])
 
         return issue_template.format(author=author['login'],
                                      author_url=author['html_url'],
-                                     body=issue['body'],
+                                     body=issue['body'] or 'No description given.',
                                      created_at=issue['created_at'],
                                      url=issue['html_url'],
                                      shortname=shortname)
 
     def _generate_comment_body(self, issue, comment):
-        comment_template = textwrap.dedent("""
-        {body}
+        comment_template = textwrap.dedent(u"""
+        <a href="{author_url}">{author}</a>: {body}
 
-        <table>
-        <legend><em>Details for <a href="{url}">original comment</a>:</em></legend>
-        <tr><td><strong>Author</strong></td><td><a href="{author_url}">{author}</a></td></tr>
-        <tr><td><strong>Created at<strong></td><td>{created_at}</td></tr>
-        </table>
+        <em><a href="{url}">Original comment</a> created at {created_at}.</em>
         """)
 
         author = _get_author(self.src.client, comment['user']['login'])
@@ -110,8 +105,8 @@ class IssueMigrator(object):
                                        url=comment_url)
 
 
-def migrate(src, dst, repo):
-    return IssueMigrator(src, dst, repo).migrate()
+def migrate(src, dst):
+    return IssueMigrator(src, dst).migrate()
 
 
 def _get_author(client, login):
