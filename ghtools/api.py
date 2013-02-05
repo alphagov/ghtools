@@ -163,6 +163,11 @@ def custom_raise_for_status(res):
     try:
         res.raise_for_status()
     except requests.RequestException as err:
+        log.exception(err)
+        log.debug("Exception response status: %s %s", err.response.status_code, err.response.reason)
+        log.debug("Exception response headers: %s", err.response.headers)
+        log.debug("Exception response content: %s", err.response.content)
+
         newerr = GithubAPIError(err)
         for k, v in err.__dict__.items():
             setattr(newerr, k, v)
