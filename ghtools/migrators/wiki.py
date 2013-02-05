@@ -25,11 +25,13 @@ def migrate(src, dst):
 def _migrate(src, dst, checkout):
     log.info("Migrating %s to %s -> wiki", src, dst)
 
-    log.debug("Migrating %s to %s -> wiki -> cloning from %s", src, dst, src.wiki_url)
-    call(['git', 'clone', '--mirror', src.wiki_url, checkout])
+    src_url = src.wiki_ssh_url
+    log.debug("Migrating %s to %s -> wiki -> cloning from %s", src, dst, src_url)
+    call(['git', 'clone', '--mirror', src_url, checkout])
 
     os.chdir(checkout)
 
-    log.debug("Migrating %s to %s -> wiki -> pushing to %s", src, dst, dst.wiki_url)
-    call(['git', 'remote', 'add', 'dest', dst.wiki_url])
+    dst_url = dst.wiki_ssh_url
+    log.debug("Migrating %s to %s -> wiki -> pushing to %s", src, dst, dst_url)
+    call(['git', 'remote', 'add', 'dest', dst_url])
     call(['git', 'push', '--mirror', 'dest'])

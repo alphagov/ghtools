@@ -21,12 +21,16 @@ class Repo(object):
         self.client = client or make_client(self._ident)
 
     @property
-    def git_url(self):
-        return 'git@{0}:{1}'.format(self.client.hostname, self.org_repo)
+    def ssh_url(self):
+        res = self.client.get('/repos/{0}'.format(self.org_repo))
+        return res.json['ssh_url']
 
     @property
-    def wiki_url(self):
-        return '{0}.wiki'.format(self.git_url)
+    def wiki_ssh_url(self):
+        ssh_url = self.ssh_url
+        if not ssh_url.endswith('.git'):
+            raise GithubError("ssh_url doesn't end with '.git', bailing!")
+        return ssh_url[:-len('.git')] + '.wiki.git'
 
     @property
     def org_repo(self):

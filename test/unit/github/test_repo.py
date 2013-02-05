@@ -23,11 +23,13 @@ class TestRepo(object):
         with assert_raises(GithubError):
             Repo('test:foo')
 
-    def test_git_url(self):
-        assert_equal(self.r.git_url, 'git@github.test:foo/bar')
+    def test_ssh_url(self):
+        self.mock_client.get.return_value.json = {'ssh_url': 'git@github.test:foo/bar.git'}
+        assert_equal(self.r.ssh_url, 'git@github.test:foo/bar.git')
 
-    def test_wiki_url(self):
-        assert_equal(self.r.wiki_url, 'git@github.test:foo/bar.wiki')
+    def test_wiki_ssh_url(self):
+        self.mock_client.get.return_value.json = {'ssh_url': 'git@github.test:foo/bar.git'}
+        assert_equal(self.r.wiki_ssh_url, 'git@github.test:foo/bar.wiki.git')
 
     def test_create_commit_comment(self):
         payload = {'body': 'foobar'}
