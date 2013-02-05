@@ -2,7 +2,7 @@ import logging
 from argh import *
 import csv
 
-from ghtools.api import GithubOrganisation, GithubAPIError
+from ghtools.exceptions import GithubAPIError
 from ghtools import migrators
 
 log = logging.getLogger(__name__)

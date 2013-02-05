@@ -4,7 +4,8 @@ import contextlib
 import logging
 import sys
 
-from ghtools.api import GithubAPIClient, GithubError
+from ghtools.api import GithubAPIClient
+from ghtools.exceptions import GithubError
 from ghtools.identifier import Identifier
 
 log = logging.getLogger(__name__)

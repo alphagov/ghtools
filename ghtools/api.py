@@ -6,6 +6,7 @@ import urlparse
 import requests
 
 from ghtools import __version__
+from ghtools.exceptions import GithubError, GithubAPIError
 
 log = logging.getLogger(__name__)
 
@@ -14,14 +15,6 @@ DEFAULT_GITHUB = 'public'
 KNOWN_GITHUBS = {
     'public': 'https://api.github.com'
 }
-
-
-class GithubError(Exception):
-    pass
-
-
-class GithubAPIError(GithubError):
-    pass
 
 
 class GithubAPIClient(object):

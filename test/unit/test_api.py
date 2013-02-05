@@ -3,7 +3,8 @@ import json
 
 from ..helpers import *
 
-from ghtools.api import GithubAPIClient, GithubOrganisation, envkey, GithubAPIError
+from ghtools.api import GithubAPIClient, GithubOrganisation, envkey
+from ghtools.exceptions import GithubAPIError
 
 # This environment variable is expected to be set when testing. Tox will set
 # it (see tox.ini)

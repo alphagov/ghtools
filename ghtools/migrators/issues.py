@@ -1,7 +1,7 @@
 import logging
 import textwrap
 
-from ghtools.api import GithubAPIError
+from ghtools.exceptions import GithubAPIError
 
 log = logging.getLogger(__name__)
 
