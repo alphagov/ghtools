@@ -1,9 +1,14 @@
 from __future__ import print_function
 
+import logging
+
 from argh import arg, dispatch_command
 from ghtools.github.organisation import Organisation
 from ghtools.github.repo import Repo
 from ghtools import migrators
+
+log = logging.getLogger(__name__)
+
 
 @arg('src', help='Migration source identifier (e.g. rails/rails)')
 @arg('dst', help='Migration destination identifier (e.g. enterprise:rails/rails)')
@@ -30,6 +35,7 @@ def migrate_project(args):
     dst = Repo(args.dst)
 
     # Create the repo object
+    log.info("Migrating %s to %s -> creating repo", src, dst)
     project = src_org.get_repo(src.repo)
     project['name'] = dst.repo
     dst_org.create_repo(project)
@@ -39,6 +45,7 @@ def migrate_project(args):
     migrators.issues.migrate(src, dst)
     migrators.comments.migrate(src, dst)
     migrators.hooks.migrate(src, dst)
+
 
 def main():
     dispatch_command(migrate_project)

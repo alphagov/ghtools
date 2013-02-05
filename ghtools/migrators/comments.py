@@ -1,7 +1,12 @@
+import logging
 import textwrap
+
+log = logging.getLogger(__name__)
 
 
 def migrate(src, dst):
+    log.info("Migrating %s to %s -> commit comments", src, dst)
+
     for comment in src.list_commit_comments():
         author_login = comment['user']['login']
         author = src.client.get('/users/{0}'.format(author_login)).json

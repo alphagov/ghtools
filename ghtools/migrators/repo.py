@@ -18,11 +18,11 @@ def migrate(src, dst):
 def _migrate(src, dst, checkout):
     log.info("Migrating %s to %s -> git data", src, dst)
 
-    log.info("Migrating %s to %s -> git data -> cloning from %s", src, dst, src.git_url)
+    log.debug("Migrating %s to %s -> git data -> cloning from %s", src, dst, src.git_url)
     call(['git', 'clone', '--mirror', src.git_url, checkout])
 
     os.chdir(checkout)
 
-    log.info("Migrating %s to %s -> git data -> pushing to %s", src, dst, dst.git_url)
+    log.debug("Migrating %s to %s -> git data -> pushing to %s", src, dst, dst.git_url)
     call(['git', 'remote', 'add', 'dest', dst.git_url])
     call(['git', 'push', '--mirror', 'dest'])

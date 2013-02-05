@@ -13,7 +13,7 @@ class IssueMigrator(object):
         self.dst = dst
 
     def migrate(self):
-        log.debug("Migrating %s to %s -> issues", self.src, self.dst)
+        log.info("Migrating %s to %s -> issues", self.src, self.dst)
 
         issues = self.src.list_issues(include_closed=True)
         sorted_issues = sorted(issues, key=lambda x: x['number'])
@@ -111,4 +111,3 @@ def migrate(src, dst):
 
 def _get_author(client, login):
     return client.get('/users/{0}'.format(login)).json
-
