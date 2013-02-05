@@ -2,6 +2,7 @@ import logging
 import textwrap
 
 from ghtools.exceptions import GithubAPIError
+from ghtools.migrators.issues import _get_author
 
 log = logging.getLogger(__name__)
 
@@ -10,9 +11,7 @@ def migrate(src, dst):
     log.info("Migrating %s to %s -> commit comments", src, dst)
 
     for comment in src.list_commit_comments():
-        author_login = comment['user']['login']
-        author = src.client.get('/users/{0}'.format(author_login)).json
-        body = _generate_comment_body(author, comment)
+        body = _generate_comment_body(src.client, comment)
 
         payload = {
             'body': body,
@@ -31,12 +30,15 @@ def migrate(src, dst):
                 raise
 
 
-def _generate_comment_body(author, comment):
+def _generate_comment_body(client, comment):
     comment_template = textwrap.dedent(u"""
-    <a href="{author_url}">{author}</a>: {body}
+    <a href="{author_url}">{author}</a>:
+    {body}
 
     <em><a href="{url}">Original comment</a> created at {created_at}.</em>
     """)
+
+    author = _get_author(client, comment['user']['login'])
 
     return comment_template.format(author=author['login'],
                                    author_url=author['html_url'],
