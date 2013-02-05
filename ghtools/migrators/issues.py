@@ -78,7 +78,8 @@ class IssueMigrator(object):
 
     def _generate_issue_body(self, issue):
         issue_template = textwrap.dedent(u"""
-        <a href="{author_url}">{author}</a>: {body}
+        <a href="{author_url}">{author}</a>:
+        {body}
 
         <em><a href="{url}">Original issue</a> ({shortname}) created at {created_at}.</em>
         """)
@@ -95,7 +96,8 @@ class IssueMigrator(object):
 
     def _generate_comment_body(self, issue, comment):
         comment_template = textwrap.dedent(u"""
-        <a href="{author_url}">{author}</a>: {body}
+        <a href="{author_url}">{author}</a>:
+        {body}
 
         <em><a href="{url}">Original comment</a> created at {created_at}.</em>
         """)
