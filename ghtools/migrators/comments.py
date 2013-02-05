@@ -1,6 +1,8 @@
 import logging
 import textwrap
 
+from ghtools.exceptions import GithubAPIError
+
 log = logging.getLogger(__name__)
 
 
@@ -19,7 +21,14 @@ def migrate(src, dst):
             'line': comment['line']
         }
 
-        dst.create_commit_comment(comment['commit_id'], payload)
+        try:
+            dst.create_commit_comment(comment['commit_id'], payload)
+        except GithubAPIError as e:
+            if e.response.status_code == 404:
+                log.warn('Could not create comment on commit %s: %s', comment['commit_id'], payload)
+                log.warn('This is probably harmless, as the commit may have been rebased out of existence.')
+            else:
+                raise
 
 
 def _generate_comment_body(author, comment):
