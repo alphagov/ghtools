@@ -9,10 +9,12 @@ log = logging.getLogger(__name__)
 
 def migrate(src, dst):
     checkout = tempfile.mkdtemp()
+    cwd = os.getcwd()
     try:
         _migrate(src, dst, checkout)
     finally:
         shutil.rmtree(checkout)
+        os.chdir(cwd)
 
 
 def _migrate(src, dst, checkout):

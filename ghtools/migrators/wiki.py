@@ -18,10 +18,12 @@ def migrate(src, dst):
     dst.client.patch('/repos/{0}'.format(dst.org_repo), data={'name': dst.repo, 'has_wiki': 'true'})
 
     checkout = tempfile.mkdtemp()
+    cwd = os.getcwd()
     try:
         _migrate(src, dst, checkout)
     finally:
         shutil.rmtree(checkout)
+        os.chdir(cwd)
 
 
 def _migrate(src, dst, checkout):
