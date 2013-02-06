@@ -30,6 +30,11 @@ class TestRepo(object):
         self.mock_client.get.return_value.json.return_value = {'ssh_url': 'git@github.test:foo/bar.git'}
         assert_equal(self.r.wiki_ssh_url, 'git@github.test:foo/bar.wiki.git')
 
+    def test_wiki_ssh_url_bail_on_weird_urls(self):
+        self.mock_client.get.return_value.json.return_value = {'ssh_url': 'git@github.test:foo/idontendindotgit'}
+        with assert_raises(GithubError):
+            self.r.wiki_ssh_url
+
     def test_create_commit_comment(self):
         payload = {'body': 'foobar'}
         self.r.create_commit_comment('deadbeef', payload)
@@ -60,6 +65,16 @@ class TestRepo(object):
         self.r.create_pull(payload)
         self.mock_client.post.assert_called_with('/repos/foo/bar/pulls',
                                                  data=payload)
+
+    def test_delete(self):
+        self.r.delete()
+        self.mock_client.delete.assert_called_with('/repos/foo/bar')
+
+    def test_get(self):
+        self.mock_client.get.return_value.json.return_value = {'name': 'foo/bar'}
+        res = self.r.get()
+        self.mock_client.get.assert_called_with('/repos/foo/bar')
+        assert_equal(res, {'name': 'foo/bar'})
 
     def test_list_commit_comments(self):
         res = self.r.list_commit_comments()
@@ -114,6 +129,10 @@ class TestRepo(object):
         issue = {'number': 123}
         self.r.open_issue(issue)
         self.mock_client.patch.assert_called_with('/repos/foo/bar/issues/123', data={'state': 'open'})
+
+    def test_set_build_status(self):
+        self.r.set_build_status('8843d7f92416211de9ebb963ff4ce28125932878', 'pending')
+        self.mock_client.post.assert_called_with('/repos/foo/bar/statuses/8843d7f92416211de9ebb963ff4ce28125932878', data='pending')
 
     def test_str(self):
         o = Repo('foo/bar')

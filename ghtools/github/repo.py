@@ -62,10 +62,12 @@ class Repo(object):
         return res.json()
 
     def delete(self):
-        return self.client.delete('/repos/{0}'.format(self.org_repo))
+        res = self.client.delete('/repos/{0}'.format(self.org_repo))
+        return res.json()
 
     def get(self):
-        return self.client.get('/repos/{0}'.format(self.org_repo))
+        res = self.client.get('/repos/{0}'.format(self.org_repo))
+        return res.json()
 
     def list_commit_comments(self):
         url = '/repos/{0}/comments'.format(self.org_repo)
