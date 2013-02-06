@@ -2,7 +2,6 @@ from datetime import datetime
 from os import environ as env
 import json
 import logging
-import urlparse
 import requests
 
 from ghtools import __version__
@@ -128,8 +127,8 @@ class GithubAPIClient(object):
 
     def paged_get(self, url, *args, **kwargs):
         for res in paged(self._session, 'get', self._url(url)):
-            for repo in res.json():
-                yield repo
+            for item in res.json():
+                yield item
 
     def __str__(self):
         return '<GithubAPIClient {0}={1}>'.format(self.nickname, self.root)
