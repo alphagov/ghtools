@@ -27,7 +27,7 @@ def browse(args):
 
         print()
         if res.json() is not None:
-            print(json.dumps(res.json, indent=2))
+            print(json.dumps(res.json(), indent=2))
         else:
             print(res.content)
 parser.set_default_command(browse)
