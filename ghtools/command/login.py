@@ -37,7 +37,7 @@ def login(args):
     Log into a GitHub instance, and print the resulting OAuth token.
     """
     with cli.catch_api_errors():
-        client = GithubAPIClient(args.github)
+        client = GithubAPIClient(nickname=args.github)
         login_if_needed(client, args.scope)
 
         oauth_token_key = envkey(client.nickname, 'oauth_token')
