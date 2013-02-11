@@ -47,6 +47,27 @@ def members(args):
 parser.add_commands([members])
 
 
+def permissions(args):
+    """
+    Print a list of teams.
+    For each team, list the members, repos and the permission (pull/push/admin)
+    """
+    with cli.catch_api_errors():
+        org = Organisation(args.org)
+        result = []
+        for team in org.list_teams():
+            members = org.list_team_members(team)
+            repos = org.list_team_repos(team)
+            result.append({
+                            "name": team['name'],
+                            "permission": team['permission'],
+                            "repos": [{ 'full_name': repo['full_name'], 'url': repo['url'] } for repo in repos],
+                            "members": [{ 'login': member['login'], 'url': member['url'] } for member in members]
+                        }) 
+        print(json.dumps(result, indent=2))
+parser.add_commands([permissions])
+
+
 def main():
     parser.dispatch()
 
