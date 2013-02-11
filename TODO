@@ -1,0 +1,17 @@
+Synchronise team structure from a Canonical GitHub to a secondary GitHub
+======
+
+As a first-line GOV.UK support operative, I want to ensure that a secondary GitHub has the correct team structure so that it is ready to be made the canonical GitHub in an emergency - ie so that all users are in the correct teams and can continue working.
+
+Suggested solution:
+Write a script that can be run regularly and syncs team structure. It would use the APIs for each GitHub, and consume a CSV that maps usernames.
+
+From a canonical GitHub, take the list of teams, including team members and team repos and apply them to the secondary GitHub. Change the secondary to ensure that:
+ - the teams are equal (except Owners?)
+ - the team members are equal, leaving/skipping unmapped members
+ - the team repos are equal, leaving/skipping repos that don't exist in both
+
+Set all team permissions on the secondary GitHub to pull.
+
+
+Changing which is the canonical GitHub and copying permissions from current-canonical to new-canonical will be handled separately.
