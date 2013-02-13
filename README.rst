@@ -60,9 +60,9 @@ bundle::
 
     $ export GITHUB_FOO_API_ROOT=https://github.foo/api/v3
     $ export GITHUB_FOO_CA_BUNDLE=/usr/share/ssl/github_foo.crt
-    $ eval `gh-login foo`
-    $ gh-repo foo:alphagov/ghtools get
-    $ gh-org foo:alphagov members
+    $ eval `gh-login -n foo`
+    $ gh-repo -n foo get alphagov/ghtools
+    $ gh-org -n foo members alphagov 
 
 License
 -------
