@@ -73,6 +73,10 @@ class Repo(object):
         url = '/repos/{0}/comments'.format(self.org_repo)
         return self.client.paged_get(url.format(self.org_repo, 'open'))
 
+    def list_commits(self):
+        url = '/repos/{0}/commits'.format(self.org_repo)
+        return self.client.paged_get(url.format(self.org_repo))
+
     def list_hooks(self):
         url = '/repos/{0}/hooks'.format(self.org_repo)
         return self.client.paged_get(url.format(self.org_repo, 'open'))

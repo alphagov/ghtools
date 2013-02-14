@@ -81,6 +81,12 @@ class TestRepo(object):
         self.mock_client.paged_get.assert_called_with('/repos/foo/bar/comments')
         assert_equal(res, self.mock_client.paged_get.return_value)
 
+    def test_list_commits(self):
+        res = self.r.list_commits()
+        self.mock_client.paged_get.assert_called_with('/repos/foo/bar/commits')
+        assert_equal(res, self.mock_client.paged_get.return_value)
+
+
     def test_list_hooks(self):
         res = self.r.list_hooks()
         self.mock_client.paged_get.assert_called_with('/repos/foo/bar/hooks')
