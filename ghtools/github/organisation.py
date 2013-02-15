@@ -1,7 +1,6 @@
 from ghtools.identifier import Identifier
 from ghtools.util import make_client
 
-
 class Organisation(object):
 
     def __init__(self, org, client=None):
@@ -10,16 +9,10 @@ class Organisation(object):
         self.client = client or make_client(self._ident)
 
     def add_team_member(self, team, login):
-        res = self.client.put('/teams/{0}/members/{1}'.format(team['id'], login), data=' ')
-        if res.status_code == 204:
-            return ''
-        return res.json()
+        self.client.put('/teams/{0}/members/{1}'.format(team['id'], login), data=' ')
 
     def add_team_repo(self, team, repo_name):
-        res = self.client.put('/teams/{0}/repos/{1}/{2}'.format(team['id'], self.org, repo_name), data=' ')
-        if res.status_code == 204:
-            return ''
-        return res.json()
+        self.client.put('/teams/{0}/repos/{1}/{2}'.format(team['id'], self.org, repo_name), data=' ')
 
     def create_repo(self, repo):
         keys = [
