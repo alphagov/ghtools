@@ -12,7 +12,7 @@ log = logging.getLogger(__name__)
 parser = ArghParser()
 
 
-def login_if_needed(gh, scopes):
+def login_if_needed(gh, scopes, comment):
     if gh.logged_in:
         log.info("Already logged in")
         return
@@ -22,13 +22,15 @@ def login_if_needed(gh, scopes):
     username = _raw_input("Username: ")
     password = getpass("Password: ")
 
-    gh.login(username, password, scopes=scopes)
+    gh.login(username, password, scopes=scopes, comment=comment)
 
 
 @arg('-s', '--scope',
      default=None,
      action='append',
      help='GitHub auth scopes to request')
+@arg('-c', '--comment',
+     help='Comment to attach to the auth token request')
 @arg('github',
      nargs='?',
      help='GitHub instance nickname (e.g "enterprise")')
@@ -38,7 +40,7 @@ def login(args):
     """
     with cli.catch_api_errors():
         client = GithubAPIClient(nickname=args.github)
-        login_if_needed(client, args.scope)
+        login_if_needed(client, args.scope, comment=args.comment)
 
         oauth_token_key = envkey(client.nickname, 'oauth_token')
         print("export {0}='{1}'".format(oauth_token_key, client.token))

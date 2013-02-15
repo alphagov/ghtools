@@ -71,14 +71,18 @@ class GithubAPIClient(object):
     def _url(self, path):
         return self.root + path
 
-    def login(self, username, password, scopes=None):
+    def login(self, username, password, scopes=None, comment=None):
         if scopes is None:
             scopes = []
 
         ver = __version__
         now = datetime.utcnow().replace(microsecond=0)
 
-        note = 'ghtools {0} (created {1})'.format(ver, now.isoformat())
+        comment_str = ''
+        if comment is not None:
+            comment_str = ', "{0}"'.format(comment)
+
+        note = 'ghtools {0} (created {1}{2})'.format(ver, now.isoformat(), comment_str)
 
         data = {
             'note': note,
