@@ -11,10 +11,14 @@ class Organisation(object):
 
     def add_team_member(self, team, login):
         res = self.client.put('/teams/{0}/members/{1}'.format(team['id'], login), data=' ')
+        if res.status_code == 204:
+            return ''
         return res.json()
 
     def add_team_repo(self, team, repo_name):
-        res = self.client.put('/teams/{0}/repos/{1}'.format(team['id'], repo_name), data=' ')
+        res = self.client.put('/teams/{0}/repos/{1}/{2}'.format(team['id'], self.org, repo_name), data=' ')
+        if res.status_code == 204:
+            return ''
         return res.json()
 
     def create_repo(self, repo):

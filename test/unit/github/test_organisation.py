@@ -26,7 +26,7 @@ class TestOrganisation(object):
     def test_add_team_repo(self):
         self.mock_client.put.return_value.json.return_value = {'id': 456}
         res = self.o.add_team_repo({'id': 123}, 'myproj')
-        self.mock_client.put.assert_called_with('/teams/123/repos/myproj', data=' ')
+        self.mock_client.put.assert_called_with('/teams/123/repos/foo/myproj', data=' ')
         assert_equal(res, {'id': 456})
 
     def test_create_repo(self):
