@@ -17,6 +17,8 @@ You should then install virtualenv_, virtualenvwrapper_, and tox_::
     $ echo '. /usr/local/share/python/virtualenvwrapper_lazy.sh' >> ~/.bashrc
     $ exec $SHELL
 
+.. _Python: http://www.python.org/
+.. _pip: http://www.pip-installer.org/
 .. _virtualenv: http://www.virtualenv.org/
 .. _virtualenvwrapper: http://www.doughellmann.com/projects/virtualenvwrapper/
 .. _tox: http://tox.readthedocs.org/
