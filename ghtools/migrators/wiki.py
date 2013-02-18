@@ -3,7 +3,8 @@ import textwrap
 import os
 import tempfile
 import shutil
-from subprocess import call
+from subprocess import check_call
+from subprocess import CalledProcessError
 from ghtools.exceptions import GithubError
 
 log = logging.getLogger(__name__)
@@ -31,18 +32,20 @@ def _migrate(src, dst, checkout):
 
     src_url = src.wiki_ssh_url
     log.debug("Migrating %s to %s -> wiki -> cloning from %s", src, dst, src_url)
-    call(['git', 'clone', '--mirror', src_url, checkout])
+    check_call(['git', 'clone', '--mirror', src_url, checkout])
 
     os.chdir(checkout)
 
     dst_url = dst.wiki_ssh_url
     log.debug("Migrating %s to %s -> wiki -> pushing to %s", src, dst, dst_url)
-    call(['git', 'remote', 'add', 'dest', dst_url])
-    if call(['git', 'push', '--mirror', 'dest']):
+    check_call(['git', 'remote', 'add', 'dest', dst_url])
+
+    try:
+        check_call(['git', 'push', '--mirror', 'dest'])
+    except CalledProcessError:
         message = textwrap.dedent(u"""
             The destination wiki does not exist, you will need to visit it at:
             {0}/wiki
             """.format(dst.client.get('/repos/{0}'.format(dst.org_repo)).json['html_url']))
-
         raise GithubError(message)
 

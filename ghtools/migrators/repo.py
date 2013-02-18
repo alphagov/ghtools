@@ -2,7 +2,7 @@ import logging
 import os
 import tempfile
 import shutil
-from subprocess import call
+from subprocess import check_call
 
 log = logging.getLogger(__name__)
 
@@ -22,11 +22,11 @@ def _migrate(src, dst, checkout):
 
     src_url = src.ssh_url
     log.debug("Migrating %s to %s -> git data -> cloning from %s", src, dst, src_url)
-    call(['git', 'clone', '--mirror', src_url, checkout])
+    check_call(['git', 'clone', '--mirror', src_url, checkout])
 
     os.chdir(checkout)
 
     dst_url = dst.ssh_url
     log.debug("Migrating %s to %s -> git data -> pushing to %s", src, dst, dst_url)
-    call(['git', 'remote', 'add', 'dest', dst_url])
-    call(['git', 'push', '--mirror', 'dest'])
+    check_call(['git', 'remote', 'add', 'dest', dst_url])
+    check_call(['git', 'push', '--mirror', 'dest'])
