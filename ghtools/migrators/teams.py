@@ -10,7 +10,7 @@ class TeamMigrator(object):
         self.src = src
         self.dst = dst
         self._mapping = self._load_members_mapping(mapping_path)
-        self._dst_teams = dict((t['name'], t['id']) for t in self.dst.list_teams())
+        self._dst_teams = dict((t['name'], t) for t in self.dst.list_teams())
 
     def migrate(self):
         for team in self.src.list_teams():
