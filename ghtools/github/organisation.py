@@ -1,6 +1,7 @@
 from ghtools.identifier import Identifier
 from ghtools.util import make_client
 
+
 class Organisation(object):
 
     def __init__(self, org, client=None):
