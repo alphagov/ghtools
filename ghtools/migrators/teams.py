@@ -26,7 +26,7 @@ class TeamMigrator(object):
                 'name': team['name'],
                 'permission': team['permission']
             }
-            self._dst_teams[team['name']] = self.dst.create_team(team)['id']
+            self._dst_teams[team['name']] = self.dst.create_team(team)
 
     def _migrate_members(self, team):
         for member in self.src.list_team_members(team):
