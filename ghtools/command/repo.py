@@ -33,6 +33,16 @@ def get(args):
         return json.dumps(repo.get(), indent=2)
 parser.add_commands([get])
 
+def create(args):
+    """
+    Create a repo with specified name
+    """
+    repo = Repo(args.repo)
+
+    with cli.catch_api_errors():
+        return repo.create()
+parser.add_commands([create])
+
 
 def main():
     parser.dispatch()

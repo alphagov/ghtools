@@ -69,6 +69,11 @@ class Repo(object):
         res = self.client.get('/repos/{0}'.format(self.org_repo))
         return res.json()
 
+    def create(self):
+        repo_information = {'name': self.repo}
+        res = self.client.post('/orgs/{0}/repos'.format(self.org), data=repo_information)
+        return res.json()
+
     def list_commit_comments(self):
         url = '/repos/{0}/comments'.format(self.org_repo)
         return self.client.paged_get(url.format(self.org_repo, 'open'))

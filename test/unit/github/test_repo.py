@@ -76,6 +76,11 @@ class TestRepo(object):
         self.mock_client.get.assert_called_with('/repos/foo/bar')
         assert_equal(res, {'name': 'foo/bar'})
 
+    def test_create(self):
+        payload = {'name': 'bar'}
+        self.r.create()
+        self.mock_client.post.assert_called_with('/orgs/foo/repos', data=payload)
+
     def test_list_commit_comments(self):
         res = self.r.list_commit_comments()
         self.mock_client.paged_get.assert_called_with('/repos/foo/bar/comments')
