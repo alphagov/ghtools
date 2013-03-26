@@ -37,8 +37,6 @@ def create(args):
     """
     Create a repo with specified name
     """
-    print("--------------------------")
-    print(args)
     repo = Repo(args.repo)
 
     with cli.catch_api_errors():
