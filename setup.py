@@ -5,7 +5,7 @@ from ghtools import __version__
 
 requirements = [
     'requests==1.1.0',
-    'argh==0.17.2'
+    'argh==0.23.0'
 ]
 
 python_scripts = [
