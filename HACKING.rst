@@ -89,6 +89,19 @@ one version of Python::
 
 .. _PyPy: http://pypy.org/
 
+Deployment to PYPI
+------------------
+
+To deploy a new version to PyPi_ you will first need to have a PyPi account and
+be an owner or maintainer of the project.
+
+1. Clone the project
+2. Update the version number in `ghtools/__init__.py`_
+3. From the terminal in the project root run `python setup.py sdist register upload`. This will build a source distribution, ask for your PyPi credentials and then upload the new version.
+
+.. _PyPi: https://pypi.python.org/pypi
+.. _`ghtools/__init__.py`: https://github.com/alphagov/ghtools/blob/master/ghtools/__init__.py
+
 Gotchas
 -------
 
