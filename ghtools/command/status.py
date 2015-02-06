@@ -16,6 +16,7 @@ parser = ArghParser(description="Set commit/branch build status")
 @arg('state', help='State to attach', choices=['pending', 'success', 'error', 'failure'])
 @arg('-d', '--description', help='Status description')
 @arg('-u', '--url', help='URL linking to status details')
+@arg('-c', '--context', help='Label to differentiate this status from the status of other systems')
 def status(args):
     """
     Set build status for a commit on GitHub
@@ -29,6 +30,9 @@ def status(args):
 
     if args.url is not None:
         payload['target_url'] = args.url
+
+    if args.context is not None:
+        payload['context'] = args.context
 
     with cli.catch_api_errors():
         res = repo.set_build_status(args.sha, payload)
