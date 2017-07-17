@@ -29,4 +29,7 @@ def _migrate(src, dst, checkout):
     dst_url = dst.ssh_url
     log.debug("Migrating %s to %s -> git data -> pushing to %s", src, dst, dst_url)
     check_call(['git', 'remote', 'add', 'dest', dst_url])
-    check_call(['git', 'push', '--mirror', 'dest'])
+    check_call(['git', 'push', 'dest',
+      '+refs/heads/*:refs/heads/*',
+      '+refs/tags/*:refs/tags/*',
+      '+refs/notes/*:refs/notes/*'])
