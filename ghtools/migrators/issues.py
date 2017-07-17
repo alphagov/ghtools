@@ -20,10 +20,10 @@ class IssueMigrator(object):
         for issue in sorted_issues:
             self._migrate_issue(issue)
 
-        pulls = self.src.list_pulls(include_closed=True)
-        sorted_pulls = sorted(pulls, key=lambda x: x['number'])
-        for pull in sorted_pulls:
-            self._migrate_pull(pull)
+        #pulls = self.src.list_pulls(include_closed=True)
+        #sorted_pulls = sorted(pulls, key=lambda x: x['number'])
+        #for pull in sorted_pulls:
+        #    self._migrate_pull(pull)
 
     def _migrate_issue(self, issue):
         log.debug("Migrating %s to %s -> issues -> #%s", self.src, self.dst, issue['number'])
