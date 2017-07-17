@@ -1,6 +1,10 @@
+import logging
+
 from ghtools.identifier import Identifier
 from ghtools.util import make_client
+from ghtools.exceptions import GithubAPIError
 
+log = logging.getLogger(__name__)
 
 class Organisation(object):
 
@@ -26,7 +30,13 @@ class Organisation(object):
             'has_downloads'
         ]
         payload = dict((k, repo[k]) for k in keys)
-        res = self.client.post('/orgs/{0}/repos'.format(self.org), data=payload)
+        try:
+            res = self.client.post('/orgs/{0}/repos'.format(self.org), data=payload)
+        except GithubAPIError as e:
+            if e.response.status_code == 422:
+                return self.get_repo(repo['name'])
+            else:
+                raise
         return res.json()
 
     def create_team(self, team):
